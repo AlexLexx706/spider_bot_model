@@ -25,8 +25,10 @@ public:
 			len_a(shoulder_lenght),
 			len_b(forearm_lenght) {
 				p_0.set_parent(this);
+				// p_0.set_angle_z(0.5);
 				p_1.set_parent(&p_0);
 				p_1.set_pos(Vector3<T>(0.0, 0.0, SHOULDER_OFFSET));
+				// std::cout << p_1.matrix() << std::endl;
 
 				p_2.set_parent(&p_1);
 				p_2.set_pos(Vector3<T>(0.0, 0.0, len_a));
@@ -40,7 +42,7 @@ public:
 
 	void move_end(const Vector3<T> & pos) {
 		//1. calk p_0 angle - vertical angle
-		std::cout << "move_end 1. pos:" << pos << std::endl;
+		//std::cout << "move_end 1. pos:" << pos << std::endl;
 
 		p_0.set_angle_y(
 			Leg::get_proj_angle(
@@ -81,6 +83,7 @@ public:
 		//std::cout << "move_end 2.6 dir_angle:" << dir_angle << std::endl;
 
 		p_1.set_angle_x(dir_angle - angle);
+		std::cout << p_1.matrix() << std::endl;
 		//std::cout << "move_end 3. p_1.angle_x:" << p_1.get_angle_x() << std::endl;
 
 		//2.2 p_2 angle

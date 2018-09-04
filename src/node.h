@@ -53,14 +53,14 @@ public:
 	}
 
 	Matrix4<T> matrix() const {
-		std::cout << "matrix this:" << this << " parent:" << parent << std::endl;
+		//std::cout << "matrix this:" << this << " parent:" << parent << std::endl;
 		return parent ? parent->matrix() * _matrix : _matrix; 
 	}
 
 	Vector3<T> to_world(const Vector3<T> & pos) const {
 		Matrix4<T> mat(matrix());
-		std::cout << "to_world this:" << this << " pos:" << pos << std::endl;
-		std::cout << mat << std::endl;
+		// std::cout << "to_world this:" << this << " pos:" << pos << std::endl;
+		// std::cout << mat << std::endl;
 		return (mat * Vector4<T>(pos, 1.0)).xyz();
 	}
 
@@ -101,7 +101,7 @@ public:
 
 		if (a_x != angle_deg) {
 			a_x = angle_deg;
-			_matrix.setRotation(Matrix3<T>::createRotationAroundAxis(a_x, a_y, a_z));
+			_matrix.setRotation(Matrix3<T>::createRotationAroundAxis(-a_x, -a_y, -a_z));
 		}
 	}
 
@@ -110,7 +110,7 @@ public:
 	void set_angle_y(T angle_deg) {
 		if (a_y != angle_deg) {
 			a_y = angle_deg;
-			_matrix.setRotation(Matrix3<T>::createRotationAroundAxis(a_x, a_y, a_z));
+			_matrix.setRotation(Matrix3<T>::createRotationAroundAxis(-a_x, -a_y, -a_z));
 		}
 	}
 
@@ -119,7 +119,7 @@ public:
 	void set_angle_z(T angle_deg) {
 		if (a_z != angle_deg) {
 			a_z = angle_deg;
-			_matrix.setRotation(Matrix3<T>::createRotationAroundAxis(a_x, a_y, a_z));
+			_matrix.setRotation(Matrix3<T>::createRotationAroundAxis(-a_x, -a_y, -a_z));
 		}
 	}
 
