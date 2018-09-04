@@ -40,11 +40,11 @@ public:
 
 		front_left_leg.set_parent(this);
 		front_left_leg.set_pos(Vector3<T>(length / 2.0, 0.0, -width / 2.0));
-		front_left_leg.set_angle_x(M_PI);
+		front_left_leg.set_angle_y(M_PI);
 
 		rear_left_leg.set_parent(this);
 		rear_left_leg.set_pos(Vector3<T>(-length / 2.0, 0.0, -width / 2.0));
-		rear_left_leg.set_angle_x(M_PI);
+		rear_left_leg.set_angle_y(M_PI);
 
 		//init default leg pos
 		front_right_pos = Vector3<T>(length / 2, -4, width / 2 + 8);
@@ -67,6 +67,12 @@ public:
 
 		rear_right_leg.move_end(
 			rear_right_pos);
+
+		//print state
+		front_right_leg.print();
+		rear_right_leg.print();
+		front_left_leg.print();
+		rear_left_leg.print();
 	}
 };
 

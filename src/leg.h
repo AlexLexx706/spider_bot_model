@@ -113,7 +113,7 @@ public:
 		//std::cout << "move_end 2.6 dir_angle:" << dir_angle << std::endl;
 
 		p_1.set_angle_x(dir_angle - angle);
-		std::cout << p_1.matrix() << std::endl;
+		//std::cout << p_1.matrix() << std::endl;
 		//std::cout << "move_end 3. p_1.angle_x:" << p_1.get_angle_x() << std::endl;
 
 		//2.2 p_2 angle
@@ -127,10 +127,15 @@ public:
 		//std::cout << "move_end 4. angle:" << angle << std::endl;
 
 		p_2.set_angle_x(M_PI - angle);
-		//std::cout << "move_end 3. p_2.angle_x:" << p_2.get_angle_x() << std::endl;
-		std::cout << "move_end shoulder_lenght:" << shoulder_lenght <<
+	}
+
+	void print() {
+		std::cout <<
+			" shoulder_offset:" << shoulder_offset <<
+			" shoulder_lenght:" << shoulder_lenght <<
 			" forearm_lenght:" << forearm_lenght <<
-			" pos:" << pos <<
+			" pos:" << Leg::get_pos() <<
+			" ang_y:" << Leg::get_angle_y() <<
 			" p_0.ang_y:" << p_0.get_angle_y() <<
 			" p_1.ang_x:" << p_1.get_angle_x() << 
 			" p_2.ang_x:" << p_2.get_angle_x() <<
