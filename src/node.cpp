@@ -20,4 +20,6 @@ void test_node() {
 	node_1.set_angle_z(12.0);
 	std::cout << "ang_z:" << node_1.get_angle_z() << std::endl;
 
+	SpiderBot<float> spider_bot;
+
 }
