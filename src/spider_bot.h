@@ -105,6 +105,47 @@ public:
 		rear_left_leg.print();
 	}
 
+	void get_state(GetStateRes<T> & res) {
+		//fill hesder
+		res.header.header.cmd = CMD_GET_STATE;
+		res.header.error = NO_ERROR;
+		res.header.header.size = sizeof(GetStateRes<T>) - sizeof(Header);
+		
+		// 0. mat
+		res.body_mat = SpiderBot::matrix(); 
+		
+		// 1. front_right_leg		
+		res.front_right_leg.pos = front_right_leg.get_pos();
+		res.front_right_leg.shoulder_offset = front_right_leg.shoulder_offset;
+		res.front_right_leg.shoulder_lenght = front_right_leg.shoulder_lenght;
+		res.front_right_leg.forearm_lenght = front_right_leg.forearm_lenght;
+		res.front_right_leg.end = front_right_leg.end.get_g_pos();
+
+		// 2. front_left_leg		
+		res.front_left_leg.pos = front_left_leg.get_pos();
+		res.front_left_leg.shoulder_offset = front_left_leg.shoulder_offset;
+		res.front_left_leg.shoulder_lenght = front_left_leg.shoulder_lenght;
+		res.front_left_leg.forearm_lenght = front_left_leg.forearm_lenght;
+		res.front_left_leg.end = front_left_leg.end.get_g_pos();
+
+		// 3. rear_right_leg		
+		res.rear_right_leg.pos = rear_right_leg.get_pos();
+		res.rear_right_leg.shoulder_offset = rear_right_leg.shoulder_offset;
+		res.rear_right_leg.shoulder_lenght = rear_right_leg.shoulder_lenght;
+		res.rear_right_leg.forearm_lenght = rear_right_leg.forearm_lenght;
+		res.rear_right_leg.end = rear_right_leg.end.get_g_pos();
+
+		// 4.rear_left_leg		
+		res.rear_left_leg.pos = rear_left_leg.get_pos();
+		res.rear_left_leg.shoulder_offset = rear_left_leg.shoulder_offset;
+		res.rear_left_leg.shoulder_lenght = rear_left_leg.shoulder_lenght;
+		res.rear_left_leg.forearm_lenght = rear_left_leg.forearm_lenght;
+		res.rear_left_leg.end = rear_left_leg.end.get_g_pos();
+
+		// 5. action
+		res.action = action; 
+	}
+
 	void set_action(Action _action) {
 		action = _action;
 	}
@@ -149,8 +190,6 @@ public:
 			}
 		}
 		double dt = (get_time() - start_time) / move_time;
-
-		std::cout << "move_state:" << move_state << std::endl;
 
 		// 1. move front_left forward
 		if (move_state == 0) {
