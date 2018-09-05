@@ -10,6 +10,7 @@
 
 template<class T>
 class Leg: public Node<T> {
+public:
 	Node<T> p_0;
 	Node<T> p_1;
 	Node<T> p_2;
