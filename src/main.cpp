@@ -167,6 +167,10 @@ int main() {
 	// std::cerr << "SetActionCmd:" << sizeof(SetActionCmd) << std::endl;
 	// std::cerr << "AddNotifyCmd:" << sizeof(AddNotifyCmd) << std::endl;
 	// return 1;
+	// Vector3<FLOAT> test(1,0,0);
+	// Matrix3<FLOAT> mat(Matrix3<FLOAT>::createRotationAroundAxis(0, 0.5, 0));
+	// std::cout << "rot:" << test * mat << std::endl;
+	// return 1;
 
 	struct sockaddr_in si_me, si_other;
 	int sock, recv_len;

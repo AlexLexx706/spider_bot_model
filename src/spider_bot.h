@@ -23,6 +23,7 @@ class SpiderBot:Node<T> {
 	T HALF_STEP_LEN;
 	T MOVE_TIME;
 	T STEP_HEIGHT;
+	T ROTATE_ANGLE;
 
 	int move_state;
 	bool begin_move;
@@ -39,6 +40,8 @@ class SpiderBot:Node<T> {
 	T start_time;
 	T cur_half_step_len;
 	int test_state;
+	int rotate_state;
+	T turn_angle;
 public:
 	SpiderBot(
 		T length=LENGTH,
@@ -55,10 +58,13 @@ public:
 			HALF_STEP_LEN(6.0),
 			MOVE_TIME(0.3),
 			STEP_HEIGHT(4.0),
+			ROTATE_ANGLE(0.5),
 			move_state(-1),
 			begin_move(true),
 			first(true),
-			test_state(-1) {
+			test_state(-1),
+			rotate_state(-1),
+			turn_angle(0.5) {
 
 		front_right_leg.set_parent(this);
 		front_right_leg.set_pos(Vector3<T>(length / 2.0, 0.0, width / 2.0));
@@ -179,12 +185,23 @@ public:
 					break;
 				} case FRONT_RIGHT_TEST: {
 					test_state = 0;
+				} case ROTATE_LEFT: {
+	                rotate_state = 0;
+	                begin_move = true;
+	                turn_angle = ROTATE_ANGLE;
+	                break;
+				} case ROTATE_RIGHT: {
+	                rotate_state = 0;
+	                begin_move = true;
+	                turn_angle = -ROTATE_ANGLE;
+	                break;
 				}
 			}
 		}
 		action = NOT_MOVE;
 		process_move();
 		process_test();
+		process_rotate();
 	}
 
 	void process_test() {
@@ -329,6 +346,97 @@ public:
 			rear_left_leg.move_end(
 				start_rear_left +
 				Vector3<T>(half_step_len * 2 * dt, step_height * sin(M_PI * dt), 0));
+		}
+	}
+
+	void process_rotate() {
+		if (begin_move) {
+			start_time = get_time();
+			begin_move = false;
+			first = true;
+		}
+
+		T dt = (get_time() - start_time) / move_time;
+		Vector3<T> up_vector = Vector3<T>(0, step_height * sin(M_PI * dt), 0);
+
+		// 1. move front left leg
+		if (rotate_state == 0) {
+			if (first) {
+				first = false;
+				start_front_left = front_left_leg.end.get_g_pos();
+				Vector3<T> tmp(front_left_pos); tmp.rotate(0., turn_angle, 0.);
+				direction = tmp - start_front_left;
+			} else if (dt >= 1.0) {
+				dt = 1.0;
+				begin_move = true;
+				rotate_state = 1;
+			}
+
+			front_left_leg.move_end(
+				start_front_left + direction * dt + up_vector);
+		// 2. move rear left leg
+		} else if (rotate_state == 1) {
+			if (first) {
+				first = false;
+				start_rear_left = rear_left_leg.end.get_g_pos();
+				Vector3<T> tmp(rear_left_pos); tmp.rotate(0., turn_angle, 0.);
+				direction = tmp - start_rear_left;
+			} else if (dt >= 1.0) {
+				dt = 1.0;
+				begin_move = true;
+				rotate_state = 2;
+			}
+			rear_left_leg.move_end(
+				start_rear_left + direction * dt + up_vector);
+		// 3. rotate all points
+		} else if (rotate_state == 2) {
+			if (first) {
+				first = false;
+				start_front_left = front_left_leg.end.get_g_pos();
+				start_rear_left = rear_left_leg.end.get_g_pos();
+				start_front_right = front_right_leg.end.get_g_pos();
+				start_rear_right = rear_right_leg.end.get_g_pos();
+			} else if (dt >= 1.0) {
+				dt = 1.0;
+				begin_move = true;
+				rotate_state = 3;
+			}
+
+			Matrix3<T> mat = Matrix3<T>::createRotationAroundAxis(0, -(-turn_angle) * dt, 0);
+			front_left_leg.move_end(mat * start_front_left);
+			rear_left_leg.move_end(mat * start_rear_left);
+			front_right_leg.move_end(mat * start_front_right);
+			rear_right_leg.move_end(mat * start_rear_right);
+		//move rear right leg
+		} else if (rotate_state == 3) {
+			if (first) {
+				first = false;
+				start_rear_right = rear_right_leg.end.get_g_pos();
+				Vector3<T> tmp(start_rear_right); tmp.rotate(0., turn_angle, 0.);
+				direction = tmp - start_rear_right;
+			} else if (dt >= 1.0) {
+				dt = 1.0;
+				begin_move = true;
+				rotate_state = 4;
+			}
+
+			rear_right_leg.move_end(
+				start_rear_right + direction * dt + up_vector);
+		//move front right leg
+		} else if (rotate_state == 4) {
+			if (first) {
+				first = false;
+				start_front_right = front_right_leg.end.get_g_pos();
+
+				Vector3<T> tmp(start_front_right); tmp.rotate(0., turn_angle, 0.);
+				direction = tmp - start_front_right;
+			} else if (dt >= 1.0) {
+				dt = 1.0;
+				begin_move = true;
+				rotate_state = -1;
+			}
+			front_right_leg.move_end(
+				start_front_right + direction * dt + up_vector);
 		}
 	}
 };
