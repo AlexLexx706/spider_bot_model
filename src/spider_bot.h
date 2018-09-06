@@ -105,7 +105,7 @@ public:
 		rear_left_leg.print();
 	}
 
-	void get_state(GetStateRes<T> & res) {
+	int get_state(GetStateRes<T> & res) {
 		//fill hesder
 		res.header.header.cmd = CMD_GET_STATE;
 		res.header.error = NO_ERROR;
@@ -143,7 +143,8 @@ public:
 		res.rear_left_leg.end = rear_left_leg.end.get_g_pos();
 
 		// 5. action
-		res.action = action; 
+		res.action = action;
+		return sizeof(GetStateRes<T>); 
 	}
 
 	void set_action(Action _action) {
@@ -157,8 +158,6 @@ public:
 	}
 
 	void step() {
-		set_action(MOVE_FORWARD);
-
 		if (move_state == -1) {
 			if (action == MOVE_FORWARD) {
 				move_state = 0;
