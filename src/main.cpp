@@ -46,7 +46,7 @@ void die(const char *sock) {
 }
 
 bool init_notify(Notifier & notifier) {
-	if ( (notifier.sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+	if ( (notifier.sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
 		perror("socket");
 		return false;
 	}
@@ -78,12 +78,14 @@ int reply(Cmd cmd, Error error, void * out_data, int max_out_size) {
 int cmd_handler(const void * in_data, unsigned long in_size, void * out_data, unsigned long max_out_size, const sockaddr_in & addr) {
 	assert(in_data && in_size && max_out_size);
 	const Header * header(static_cast<const Header *>(in_data));
+	std::cerr << "in_size:" << in_size << std::endl;
 
 	//1. check in buffer size
 	if (in_size < sizeof(Header)) {
 		return reply(UNKNOWN_CMD, WRONG_DATA, out_data, max_out_size);
 	}
 
+	std::cerr << "cmd:" << header->cmd  << " size:" << header->size << std::endl;
 	//2. process commands
 	switch (header->cmd) {
 		case CMD_GET_STATE: {
@@ -103,23 +105,23 @@ int cmd_handler(const void * in_data, unsigned long in_size, void * out_data, un
 			if (in_size < sizeof(AddNotifyCmd)) {
 				return reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size);
 			}
-
 			const AddNotifyCmd * notify(static_cast<const AddNotifyCmd *>(in_data));
 			//add new notify
 			sockaddr_in new_addr = addr;
-			new_addr.sin_port = notify->port;
+			new_addr.sin_port = htons(notify->port);
 			notify_map_t::iterator iter = notify_map.find(new_addr);
 
 			//1. new notifier
 			if (iter == notify_map.end()) {
-				notify_map_t::mapped_type & notifier = notify_map[addr];
 
+				notify_map_t::mapped_type & notifier = notify_map[new_addr];
+	
 				if (init_notify(notifier)) {
 					return reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size);
-				} else {
-					notify_map.erase(addr);
-					return reply(static_cast<Cmd>(header->cmd), UNKNOWN_ERROR, out_data, max_out_size);					
 				}
+
+				notify_map.erase(new_addr);
+				return reply(static_cast<Cmd>(header->cmd), UNKNOWN_ERROR, out_data, max_out_size);					
 			}
 
 			//2. notify exist
@@ -143,7 +145,7 @@ int cmd_handler(const void * in_data, unsigned long in_size, void * out_data, un
 
 			// 2. remove socket
 			deinit_notify(iter->second);
-			notify_map.erase(addr);
+			notify_map.erase(new_addr);
 		}
 	}
 
@@ -161,12 +163,17 @@ void sig_handler(int signo) {
 
 
 int main() {
+	std::cerr << "Header:" << sizeof(Header) << std::endl;
+	std::cerr << "SetActionCmd:" << sizeof(SetActionCmd) << std::endl;
+	std::cerr << "AddNotifyCmd:" << sizeof(AddNotifyCmd) << std::endl;
+	// return 1;
+
 	struct sockaddr_in si_me, si_other;
 	int sock, recv_len;
 	socklen_t slen = sizeof(si_other);
 
 	//create a UDP socket
-	if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
 		die("socket");
 	}
 
@@ -183,7 +190,7 @@ int main() {
 	si_me.sin_family = AF_INET;
 	si_me.sin_port = htons(PORT);
 	si_me.sin_addr.s_addr = htonl(INADDR_ANY);
-	 
+
 	//bind socket to port
 	if( bind(sock , (struct sockaddr*)&si_me, sizeof(si_me) ) == -1) {
 		die("bind");
@@ -221,11 +228,17 @@ int main() {
 
 		// 4. send notify
 		for (notify_map_t::iterator iter=notify_map.begin(), end=notify_map.end(); iter != end; iter++) {
-			if (sendto(iter->second.sock, &bot_state, sizeof(bot_state), 0, (struct sockaddr *)&iter->first, sizeof(iter->first)) == -1) {
+			if (sendto(
+					iter->second.sock,
+					&bot_state,
+					sizeof(bot_state),
+					0,
+					(struct sockaddr *)&iter->first,
+					sizeof(iter->first)) == -1) {
 				perror("fcntl");
 			}
+
 		}
-		std::cout << "1" << std::endl;
 		// 4. update times
 		t.tv_nsec += period;
 		while (t.tv_nsec >= 1e9L)

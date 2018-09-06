@@ -30,7 +30,7 @@ enum Error {
 
 struct Header {
 	int cmd;
-	unsigned long size; 
+	unsigned int size; 
 };
 
 struct ResHeader {
