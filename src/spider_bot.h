@@ -158,6 +158,7 @@ public:
 	}
 
 	void step() {
+		// set_action(MOVE_FORWARD);
 		if (move_state == -1) {
 			if (action == MOVE_FORWARD) {
 				move_state = 0;

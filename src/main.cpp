@@ -78,14 +78,14 @@ int reply(Cmd cmd, Error error, void * out_data, int max_out_size) {
 int cmd_handler(const void * in_data, unsigned long in_size, void * out_data, unsigned long max_out_size, const sockaddr_in & addr) {
 	assert(in_data && in_size && max_out_size);
 	const Header * header(static_cast<const Header *>(in_data));
-	std::cerr << "in_size:" << in_size << std::endl;
+	// std::cerr << "in_size:" << in_size << std::endl;
 
 	//1. check in buffer size
 	if (in_size < sizeof(Header)) {
 		return reply(UNKNOWN_CMD, WRONG_DATA, out_data, max_out_size);
 	}
 
-	std::cerr << "cmd:" << header->cmd  << " size:" << header->size << std::endl;
+	// std::cerr << "cmd:" << header->cmd  << " size:" << header->size << std::endl;
 	//2. process commands
 	switch (header->cmd) {
 		case CMD_GET_STATE: {
@@ -163,9 +163,9 @@ void sig_handler(int signo) {
 
 
 int main() {
-	std::cerr << "Header:" << sizeof(Header) << std::endl;
-	std::cerr << "SetActionCmd:" << sizeof(SetActionCmd) << std::endl;
-	std::cerr << "AddNotifyCmd:" << sizeof(AddNotifyCmd) << std::endl;
+	// std::cerr << "Header:" << sizeof(Header) << std::endl;
+	// std::cerr << "SetActionCmd:" << sizeof(SetActionCmd) << std::endl;
+	// std::cerr << "AddNotifyCmd:" << sizeof(AddNotifyCmd) << std::endl;
 	// return 1;
 
 	struct sockaddr_in si_me, si_other;
