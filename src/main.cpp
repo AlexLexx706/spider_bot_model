@@ -209,7 +209,7 @@ int main() {
 				perror("fcntl");
 			}
 		}
-
+		std::const << "1" << std::endl;
 		// 4. update times
 		t.tv_nsec += period;
 		while (t.tv_nsec >= 1e9L)
