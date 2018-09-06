@@ -96,7 +96,6 @@ public:
 
 		rear_right_leg.move_end(
 			rear_right_pos);
-
 	}
 
 	void print() {
@@ -160,7 +159,8 @@ public:
 	}
 
 	void step() {
-		// set_action(FRONT_RIGHT_TEST);
+		// set_action(MOVE_FORWARD);
+
 		if (move_state == -1 && test_state == -1) {
 			switch (action) {
 				case MOVE_FORWARD: {
@@ -179,7 +179,6 @@ public:
 					break;
 				} case FRONT_RIGHT_TEST: {
 					test_state = 0;
-
 				}
 			}
 		}
@@ -213,11 +212,6 @@ public:
 			start_time = get_time();
 			begin_move = false;
 			first = true;
-
-			//init pose
-			if (move_state == 0) {
-				reset();
-			}
 		}
 		double dt = (get_time() - start_time) / move_time;
 
@@ -334,10 +328,7 @@ public:
 			// move leg
 			rear_left_leg.move_end(
 				start_rear_left +
-				Vector3<T>(
-					half_step_len * 2 * dt,
-					step_height * sin(M_PI * dt),
-					0));
+				Vector3<T>(half_step_len * 2 * dt, step_height * sin(M_PI * dt), 0));
 		}
 	}
 };
