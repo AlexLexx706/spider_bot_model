@@ -64,12 +64,12 @@ struct SetActionCmd {
 	int action;
 };
 
-struct AddNotify {
+struct AddNotifyCmd {
 	Header header;
 	unsigned short port;
 };
 
-struct RmNotify {
+struct RmNotifyCmd {
 	Header header;
 	unsigned short port;
 };

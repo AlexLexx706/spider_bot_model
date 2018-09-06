@@ -8,8 +8,10 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
-#include "spider_bot.h"
+#include <signal.h>
 #include <map>
+
+#include "spider_bot.h"
 
 #define BUFLEN 1024L
 #define FLOAT float
@@ -20,6 +22,7 @@ static GetStateRes<FLOAT> get_state_res;
 static int PORT = 8888;
 static char in_buffer[BUFLEN];
 static char out_buffer[BUFLEN];
+static bool exit_flag = false;
 
 //describe notifier
 struct Notifier {
@@ -97,11 +100,11 @@ int cmd_handler(const void * in_data, unsigned long in_size, void * out_data, un
 			break;
 		}
 		case CMD_ADD_NOTIFY: {
-			if (in_size < sizeof(AddNotify)) {
+			if (in_size < sizeof(AddNotifyCmd)) {
 				return reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size);
 			}
 
-			const AddNotify * notify(static_cast<const AddNotify *>(in_data));
+			const AddNotifyCmd * notify(static_cast<const AddNotifyCmd *>(in_data));
 			//add new notify
 			sockaddr_in new_addr = addr;
 			new_addr.sin_port = notify->port;
@@ -123,11 +126,11 @@ int cmd_handler(const void * in_data, unsigned long in_size, void * out_data, un
 			return reply(static_cast<Cmd>(header->cmd), WRONG_PARAMS, out_data, max_out_size);
 		}
 		case CMD_RM_NOTIFY: {
-			if (in_size < sizeof(RmNotify)) {
+			if (in_size < sizeof(RmNotifyCmd)) {
 				return reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size);
 			}
 
-			const RmNotify * notify(static_cast<const RmNotify *>(in_data));
+			const RmNotifyCmd * notify(static_cast<const RmNotifyCmd *>(in_data));
 			//add new notify
 			sockaddr_in new_addr = addr;
 			new_addr.sin_port = notify->port;
@@ -148,6 +151,15 @@ int cmd_handler(const void * in_data, unsigned long in_size, void * out_data, un
 	return reply(static_cast<Cmd>(header->cmd), WRONG_COMMAND, out_data, max_out_size);
 }
 
+
+//exist programm
+void sig_handler(int signo) {
+	if (signo == SIGINT) {
+		exit_flag = true;
+	}
+}
+
+
 int main() {
 	struct sockaddr_in si_me, si_other;
 	int sock, recv_len;
@@ -155,6 +167,10 @@ int main() {
 
 	//create a UDP socket
 	if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+		die("socket");
+	}
+
+	if (signal(SIGINT, sig_handler) == SIG_ERR) {
 		die("socket");
 	}
 
@@ -176,7 +192,7 @@ int main() {
 	struct timespec t;
 	clock_gettime(CLOCK_MONOTONIC ,&t);
 
-	while(1) {
+	while(not exit_flag) {
 		clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &t, NULL);
 		
 		// 1. step
@@ -209,7 +225,7 @@ int main() {
 				perror("fcntl");
 			}
 		}
-		std::const << "1" << std::endl;
+		std::cout << "1" << std::endl;
 		// 4. update times
 		t.tv_nsec += period;
 		while (t.tv_nsec >= 1e9L)
@@ -220,5 +236,10 @@ int main() {
 	}
 
 	close(sock);
+
+	for (notify_map_t::iterator iter=notify_map.begin(), end=notify_map.end(); iter != end; iter++) {
+		deinit_notify(iter->second);
+	}
+
 	return 0;
 } 
