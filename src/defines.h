@@ -8,6 +8,7 @@ enum Action {
     MOVE_BACKWARD = 2,
     ROTATE_LEFT = 3,
     ROTATE_RIGHT = 4,
+    FRONT_RIGHT_TEST = 5,
 };
 
 enum Cmd{

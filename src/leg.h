@@ -73,16 +73,15 @@ public:
 
 	void move_end(const Vector3<T> & pos) {
 		//1. calk p_0 angle - vertical angle
-		//std::cout << "move_end 1. pos:" << pos << std::endl;
+		// std::cout << "move_end 1. pos:" << pos << std::endl;
 
 		p_0.set_angle_y(
 			Leg::get_proj_angle(
 				Vector3<T>(0.0, 0.0, 1.0),
-				Vector3<T>(0.1, 0.0, 0.0),
+				Vector3<T>(1.0, 0.0, 0.0),
 				Leg::from_world(pos)));
 
-		//std::cout << "move_end 2. angle_y:" << Leg::get_angle_y() << std::endl;
-
+		// std::cout << "move_end 2. angle_y:" << p_0.get_angle_y() << std::endl;
 	   	//2. calk triangle
 		Vector3<T> cur_pos(p_0.from_world(pos) - p_1.get_pos());
 		T len_c = cur_pos.length();

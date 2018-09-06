@@ -105,7 +105,9 @@ public:
 		}
 	}
 
-	T get_angle_y() const { return a_y;}
+	T get_angle_y() const {
+		return a_y;
+	}
 
 	void set_angle_y(T angle_deg) {
 		if (a_y != angle_deg) {

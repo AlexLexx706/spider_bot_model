@@ -7,13 +7,13 @@ OFILES += main.o
 OFILES += node.o
 OFILES += leg.o
 
-CPPFLAGS = -g -I -g2 -Wall
+CPPFLAGS = -O3 -I  -Wall
 LDFLAGS = -ldl
 
 OFILES_PATH=$(addprefix obj/,$(OFILES))
 
 
-all: obj  $(OFILES_PATH)
+all:  obj $(OFILES_PATH)
 	@$(CXX) $(LDFLAGS) -o test $(OFILES_PATH)
 
 obj:

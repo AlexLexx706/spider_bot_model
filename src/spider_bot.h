@@ -38,6 +38,7 @@ class SpiderBot:Node<T> {
    	Vector3<T> direction;
 	T start_time;
 	T cur_half_step_len;
+	int test_state;
 public:
 	SpiderBot(
 		T length=LENGTH,
@@ -56,7 +57,8 @@ public:
 			STEP_HEIGHT(4.0),
 			move_state(-1),
 			begin_move(true),
-			first(true) {
+			first(true),
+			test_state(-1) {
 
 		front_right_leg.set_parent(this);
 		front_right_leg.set_pos(Vector3<T>(length / 2.0, 0.0, width / 2.0));
@@ -158,24 +160,52 @@ public:
 	}
 
 	void step() {
-		// set_action(MOVE_FORWARD);
-		if (move_state == -1) {
-			if (action == MOVE_FORWARD) {
-				move_state = 0;
-				begin_move = true;
-				half_step_len = HALF_STEP_LEN;
-				move_time = MOVE_TIME;
-				step_height = STEP_HEIGHT;
-			} else if(action == MOVE_BACKWARD) {
-				move_state = 0;
-				begin_move = true;
-				half_step_len = -HALF_STEP_LEN;
-				move_time = MOVE_TIME;
-				step_height = STEP_HEIGHT;
+		// set_action(FRONT_RIGHT_TEST);
+		if (move_state == -1 && test_state == -1) {
+			switch (action) {
+				case MOVE_FORWARD: {
+					move_state = 0;
+					begin_move = true;
+					half_step_len = HALF_STEP_LEN;
+					move_time = MOVE_TIME;
+					step_height = STEP_HEIGHT;
+					break;
+				} case MOVE_BACKWARD: {
+					move_state = 0;
+					begin_move = true;
+					half_step_len = -HALF_STEP_LEN;
+					move_time = MOVE_TIME;
+					step_height = STEP_HEIGHT;
+					break;
+				} case FRONT_RIGHT_TEST: {
+					test_state = 0;
+
+				}
 			}
 		}
 		action = NOT_MOVE;
 		process_move();
+		process_test();
+	}
+
+	void process_test() {
+		//1. begin
+		if (test_state == 0) {
+			start_time = get_time();
+			start_front_right = front_right_pos;
+			test_state = 1;
+		}
+
+		if (test_state == 1) {
+			double dt = (get_time() - start_time) / 10.0;
+			if (dt >= 1.0) {
+				test_state = -1;
+				dt = 1.0;
+			}
+			// 2.update pos
+			Vector3<T> pos = start_front_right + Vector3<T>(0.0, 10.0, 0.0) * sin(M_PI * dt);
+			front_right_leg.move_end(pos);
+		}
 	}
 
 	void process_move() {
