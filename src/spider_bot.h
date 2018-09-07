@@ -370,6 +370,10 @@ public:
 		}
 
 		T dt = (get_time() - start_time) / move_time;
+		if (dt >= 1.0) {
+				dt = 1.0;
+		}
+
 		Vector3<T> up_vector = Vector3<T>(0, step_height * sin(M_PI * dt), 0);
 
 		// 1. move front left leg
