@@ -165,9 +165,9 @@ public:
 	}
 
 	void step() {
-		// set_action(MOVE_FORWARD);
+		// set_action(ROTATE_LEFT);
 
-		if (move_state == -1 && test_state == -1) {
+		if (move_state == -1 && test_state == -1 && rotate_state == -1) {
 			switch (action) {
 				case MOVE_FORWARD: {
 					move_state = 0;
@@ -185,16 +185,21 @@ public:
 					break;
 				} case FRONT_RIGHT_TEST: {
 					test_state = 0;
+					break;
 				} case ROTATE_LEFT: {
-	                rotate_state = 0;
-	                begin_move = true;
-	                turn_angle = ROTATE_ANGLE;
-	                break;
+					rotate_state = 0;
+					begin_move = true;
+					turn_angle = ROTATE_ANGLE;
+					move_time = MOVE_TIME;
+					step_height = STEP_HEIGHT;
+					break;
 				} case ROTATE_RIGHT: {
-	                rotate_state = 0;
-	                begin_move = true;
-	                turn_angle = -ROTATE_ANGLE;
-	                break;
+					rotate_state = 0;
+					begin_move = true;
+					turn_angle = -ROTATE_ANGLE;
+	  				move_time = MOVE_TIME;
+					step_height = STEP_HEIGHT;
+					break;
 				}
 			}
 		}
@@ -225,6 +230,10 @@ public:
 	}
 
 	void process_move() {
+		if (move_state < 0) {
+			return;
+		}
+
 		if (begin_move) {
 			start_time = get_time();
 			begin_move = false;
@@ -350,6 +359,10 @@ public:
 	}
 
 	void process_rotate() {
+		if (rotate_state < 0) {
+			return;
+		}
+
 		if (begin_move) {
 			start_time = get_time();
 			begin_move = false;
