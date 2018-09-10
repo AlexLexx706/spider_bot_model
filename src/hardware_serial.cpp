@@ -13,13 +13,16 @@ HardwareSerial::HardwareSerial():fd(-1), read_res(-1) {
 }
 
 bool HardwareSerial::open(const char * port_path) {
-	if (fd != 0) {
+	fprintf(stderr, "open port_path:%s\n", port_path);
+
+	if (fd != -1) {
 		fprintf(stderr, "port already open!!\n");
 		return false;		
 	}
 
 	assert(port_path);
 	fd = ::open(port_path, O_RDWR | O_NOCTTY | O_SYNC);
+
 	if (fd == -1) {
 		perror("open");
 		return false;
@@ -49,11 +52,12 @@ bool HardwareSerial::open(const char * port_path) {
 		fd = -1;
 		return false;
 	}
+	fprintf(stderr, "open res ok, fd:%d\n", fd);
 	return true;
 }
 
 bool HardwareSerial::close() {
-	if (fd == -1){
+	if (fd == -1) {
 		fprintf(stderr, "port not open\n");
 		return false;
 	}
@@ -71,18 +75,24 @@ HardwareSerial::~HardwareSerial() {
 	}
 }
 
-int HardwareSerial::write(const byte * buf, int size) {
-	assert(fd == -1);
-	return ::write(fd, buf, size);
+int HardwareSerial::write(const uint8_t * buf, int size) {
+	assert(fd != -1);
+	int res = ::write(fd, buf, size);
+	fprintf(stderr, "write size:%d res:%d\n", size,  res);
+	return res;
+
 }
 
 int HardwareSerial::available() {
-	assert(fd == -1);
+	assert(fd != -1);
 	read_res = -1;
-	return ::read(fd, &read_res, 1);
+	int res = ::read(fd, &read_res, 1);
+	fprintf(stderr, "available res:%d\n", res);
+	return res;
 }
 
 int HardwareSerial::read() {
-	assert(fd == -1);
+	assert(fd != -1);
+	fprintf(stderr, "read read_res:0x%02x\n", (char)read_res);
 	return read_res;
 }

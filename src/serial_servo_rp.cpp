@@ -1,7 +1,9 @@
-#include <stdint.h>
 #include <string.h>
+#include <stdio.h>
+#include "serial_servo_rp.h"
 #include "hardware_serial.h"
 #include "utils.h"
+
 
 #define GET_LOW_BYTE(A) (uint8_t)((A))
 //Macro function	get lower 8 bits of A
@@ -42,19 +44,19 @@
 
 //#define LOBOT_DEBUG 1	/*Debug ：print debug value*/
 
-byte LobotCheckSum(byte buf[]) {
-	byte i;
+uint8_t LobotCheckSum(uint8_t buf[]) {
+	uint8_t i;
 	uint16_t temp = 0;
 	for (i = 2; i < buf[3] + 2; i++) {
 		temp += buf[i];
 	}
 	temp = ~temp;
-	i = (byte)temp;
+	i = (uint8_t)temp;
 	return i;
 }
 
 void LobotSerialServoMove(HardwareSerial &serial_x, uint8_t id, int16_t position, uint16_t time) {
-	byte buf[10];
+	uint8_t buf[10];
 	if(position < 0)
 		position = 0;
 	if(position > 1000)
@@ -72,7 +74,7 @@ void LobotSerialServoMove(HardwareSerial &serial_x, uint8_t id, int16_t position
 }
 
 void LobotSerialServoStopMove(HardwareSerial &serial_x, uint8_t id) {
-	byte buf[6];
+	uint8_t buf[6];
 	buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
 	buf[2] = id;
 	buf[3] = 3;
@@ -82,7 +84,7 @@ void LobotSerialServoStopMove(HardwareSerial &serial_x, uint8_t id) {
 }
 
 void LobotSerialServoSetID(HardwareSerial &serial_x, uint8_t oldID, uint8_t newID) {
-	byte buf[7];
+	uint8_t buf[7];
 	buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
 	buf[2] = oldID;
 	buf[3] = 4;
@@ -93,7 +95,7 @@ void LobotSerialServoSetID(HardwareSerial &serial_x, uint8_t oldID, uint8_t newI
 }
 
 void LobotSerialServoSetMode(HardwareSerial &serial_x, uint8_t id, uint8_t Mode, int16_t Speed) {
-	byte buf[10];
+	uint8_t buf[10];
 
 	buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
 	buf[2] = id;
@@ -108,7 +110,7 @@ void LobotSerialServoSetMode(HardwareSerial &serial_x, uint8_t id, uint8_t Mode,
 }
 
 void LobotSerialServoLoad(HardwareSerial &serial_x, uint8_t id) {
-	byte buf[7];
+	uint8_t buf[7];
 	buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
 	buf[2] = id;
 	buf[3] = 4;
@@ -120,7 +122,7 @@ void LobotSerialServoLoad(HardwareSerial &serial_x, uint8_t id) {
 }
 
 void LobotSerialServoUnload(HardwareSerial &serial_x, uint8_t id) {
-	byte buf[7];
+	uint8_t buf[7];
 	buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
 	buf[2] = id;
 	buf[3] = 4;
@@ -132,15 +134,15 @@ void LobotSerialServoUnload(HardwareSerial &serial_x, uint8_t id) {
 }
 
 
-int LobotSerialServoReceiveHandle(HardwareSerial &serial_x, byte *ret) {
+int LobotSerialServoReceiveHandle(HardwareSerial &serial_x, uint8_t *ret) {
 	bool frameStarted = false;
 	bool receiveFinished = false;
-	byte frameCount = 0;
-	byte dataCount = 0;
-	byte dataLength = 2;
-	byte rxBuf;
-	byte recvBuf[32];
-	byte i;
+	uint8_t frameCount = 0;
+	uint8_t dataCount = 0;
+	uint8_t dataLength = 2;
+	uint8_t rxBuf;
+	uint8_t recvBuf[32];
+	uint8_t i;
 
 	while (serial_x.available()) {
 		rxBuf = serial_x.read();
@@ -188,7 +190,7 @@ int LobotSerialServoReceiveHandle(HardwareSerial &serial_x, byte *ret) {
 int LobotSerialServoReadPosition(HardwareSerial &serial_x, uint8_t id) {
 	int count = 10000;
 	int ret;
-	byte buf[6];
+	uint8_t buf[6];
 
 	buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
 	buf[2] = id;
@@ -213,13 +215,14 @@ int LobotSerialServoReadPosition(HardwareSerial &serial_x, uint8_t id) {
 	} else {
 		ret = -1;
 	}
+
 	return ret;
 }
 
 int LobotSerialServoReadVin(HardwareSerial &serial_x, uint8_t id) {
 	int count = 10000;
 	int ret;
-	byte buf[6];
+	uint8_t buf[6];
 
 	buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
 	buf[2] = id;

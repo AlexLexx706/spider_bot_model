@@ -10,8 +10,8 @@
 #include <assert.h>
 #include <signal.h>
 #include <map>
-
 #include "spider_bot.h"
+#include "hardware_serial.h"
 
 #define BUFLEN 1024L
 #define FLOAT float
@@ -163,6 +163,17 @@ void sig_handler(int signo) {
 
 
 int main() {
+	HardwareSerial hs;
+	if (!hs.open("/dev/ttyUSB0")) {
+		return 1;
+	}
+
+	int LobotSerialServoReadPosition(HardwareSerial &serial_x, uint8_t id);
+	int res = LobotSerialServoReadPosition(hs, 1);
+	fprintf(stderr, "servo pos:%d\n", res);
+	return 0;
+
+
 	struct sockaddr_in si_me, si_other;
 	int sock, recv_len;
 	socklen_t slen = sizeof(si_other);

@@ -1,7 +1,6 @@
 #ifndef _HARDWARE_SERIAL_H_
 #define _HARDWARE_SERIAL_H_
-
-typedef unsigned char byte;
+#include <stdint.h>
 
 class HardwareSerial {
 	int fd;
@@ -11,7 +10,7 @@ public:
 	~HardwareSerial();
 	bool open(const char * port_path);
 	bool close();
-	int write(const byte * buf, int size);
+	int write(const uint8_t * buf, int size);
 	int available();
 	int read();
 };
