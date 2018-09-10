@@ -12,6 +12,7 @@
 #include <map>
 #include "spider_bot.h"
 #include "hardware_serial.h"
+#include "serial_servo_rp.h"
 
 #define BUFLEN 1024L
 #define FLOAT float
@@ -168,9 +169,9 @@ int main() {
 		return 1;
 	}
 
-	int LobotSerialServoReadPosition(HardwareSerial &serial_x, uint8_t id);
 	int res = LobotSerialServoReadPosition(hs, 1);
 	fprintf(stderr, "servo pos:%d\n", res);
+	res = LobotSerialServoReadVin
 	return 0;
 
 
