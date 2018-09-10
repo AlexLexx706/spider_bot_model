@@ -6,6 +6,10 @@ VPATH = :./src
 OFILES += main.o
 OFILES += node.o
 OFILES += leg.o
+OFILES += hardware_serial.o
+OFILES += serial_servo_rp.o
+OFILES += utils.o
+
 
 CPPFLAGS = -O3 -I  -Wall
 LDFLAGS = -ldl
