@@ -10,8 +10,8 @@ void LobotSerialServoSetID(HardwareSerial &serial_x, uint8_t oldID, uint8_t newI
 void LobotSerialServoSetMode(HardwareSerial &serial_x, uint8_t id, uint8_t Mode, int16_t Speed);
 void LobotSerialServoLoad(HardwareSerial &serial_x, uint8_t id);
 void LobotSerialServoUnload(HardwareSerial &serial_x, uint8_t id);
-int LobotSerialServoReadPosition(HardwareSerial &serial_x, uint8_t id);
-int LobotSerialServoReadVin(HardwareSerial &serial_x, uint8_t id);
+int16_t LobotSerialServoReadPosition(HardwareSerial &serial_x, uint8_t id);
+int16_t LobotSerialServoReadVin(HardwareSerial &serial_x, uint8_t id);
 
 
 #endif //_SERIAL_SERVO_RP_H_

@@ -169,9 +169,16 @@ int main() {
 		return 1;
 	}
 
-	int res = LobotSerialServoReadPosition(hs, 1);
-	fprintf(stderr, "servo pos:%d\n", res);
-	res = LobotSerialServoReadVin
+	int16_t res = LobotSerialServoReadPosition(hs, 1);
+	fprintf(stderr, "servo pos:%hd\n", res);
+
+	res = LobotSerialServoReadVin(hs, 1);
+	fprintf(stderr, "servo vin:%hd\n", res);
+
+	LobotSerialServoMove(hs, 1, 1000, 1000);
+	
+	res = LobotSerialServoReadPosition(hs, 1);
+	fprintf(stderr, "servo pos:%hd\n", res);
 	return 0;
 
 

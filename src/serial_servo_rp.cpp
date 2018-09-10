@@ -56,6 +56,8 @@ uint8_t LobotCheckSum(uint8_t buf[]) {
 }
 
 void LobotSerialServoMove(HardwareSerial &serial_x, uint8_t id, int16_t position, uint16_t time) {
+	fprintf(stderr, "LobotSerialServoMove id:%hhu position:%hd time:%hu\n", id, position, time);
+
 	uint8_t buf[10];
 	if(position < 0)
 		position = 0;
@@ -187,9 +189,11 @@ int LobotSerialServoReceiveHandle(HardwareSerial &serial_x, uint8_t *ret) {
 }
 
 
-int LobotSerialServoReadPosition(HardwareSerial &serial_x, uint8_t id) {
+int16_t LobotSerialServoReadPosition(HardwareSerial &serial_x, uint8_t id) {
+	fprintf(stderr, "LobotSerialServoReadPosition id:%hhu\n", id);
+
 	int count = 10000;
-	int ret;
+	int16_t ret;
 	uint8_t buf[6];
 
 	buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
@@ -198,30 +202,30 @@ int LobotSerialServoReadPosition(HardwareSerial &serial_x, uint8_t id) {
 	buf[4] = LOBOT_SERVO_POS_READ;
 	buf[5] = LobotCheckSum(buf);
 
-	while (serial_x.available()) {
-		serial_x.read();
-	}
+	// while (serial_x.available()) {
+	// 	serial_x.read();
+	// }
 
 	serial_x.write(buf, 6);
 
 	while (!serial_x.available()) {
 		count -= 1;
-		if (count < 0)
+		if (count < 0) {
 			return -1;
+		}
 	}
 
 	if (LobotSerialServoReceiveHandle(serial_x, buf) > 0) {
-		ret = BYTE_TO_HW(buf[2], buf[1]);
-	} else {
-		ret = -1;
+		return  BYTE_TO_HW(buf[2], buf[1]);
 	}
-
-	return ret;
+	return -1;
 }
 
-int LobotSerialServoReadVin(HardwareSerial &serial_x, uint8_t id) {
+int16_t LobotSerialServoReadVin(HardwareSerial &serial_x, uint8_t id) {
+	fprintf(stderr, "LobotSerialServoReadVin id:%hhu\n", id);
+
 	int count = 10000;
-	int ret;
+	int16_t ret;
 	uint8_t buf[6];
 
 	buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
@@ -230,8 +234,8 @@ int LobotSerialServoReadVin(HardwareSerial &serial_x, uint8_t id) {
 	buf[4] = LOBOT_SERVO_VIN_READ;
 	buf[5] = LobotCheckSum(buf);
 
-	while (serial_x.available())
-		serial_x.read();
+	// while (serial_x.available())
+	// 	serial_x.read();
 
 	serial_x.write(buf, 6);
 
@@ -242,11 +246,10 @@ int LobotSerialServoReadVin(HardwareSerial &serial_x, uint8_t id) {
 	}
 
 	if (LobotSerialServoReceiveHandle(serial_x, buf) > 0) {
-		ret = (int16_t)BYTE_TO_HW(buf[2], buf[1]);
+		return BYTE_TO_HW(buf[2], buf[1]);
 	} else {
-		ret = -2048;
+		return -2048;
 	}
-	return ret;
 }
 
 // void setup() {

@@ -52,7 +52,6 @@ bool HardwareSerial::open(const char * port_path) {
 		fd = -1;
 		return false;
 	}
-	fprintf(stderr, "open res ok, fd:%d\n", fd);
 	return true;
 }
 
@@ -78,21 +77,21 @@ HardwareSerial::~HardwareSerial() {
 int HardwareSerial::write(const uint8_t * buf, int size) {
 	assert(fd != -1);
 	int res = ::write(fd, buf, size);
-	fprintf(stderr, "write size:%d res:%d\n", size,  res);
 	return res;
-
 }
 
 int HardwareSerial::available() {
 	assert(fd != -1);
-	read_res = -1;
+	if (read_res != -1) {
+		return 1;
+	}
 	int res = ::read(fd, &read_res, 1);
-	fprintf(stderr, "available res:%d\n", res);
 	return res;
 }
 
 int HardwareSerial::read() {
 	assert(fd != -1);
-	fprintf(stderr, "read read_res:0x%02x\n", (char)read_res);
-	return read_res;
+	int tmp = read_res;
+	read_res = -1;
+	return tmp;
 }
