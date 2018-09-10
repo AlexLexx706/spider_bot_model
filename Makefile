@@ -9,6 +9,7 @@ OFILES += leg.o
 OFILES += hardware_serial.o
 OFILES += serial_servo_rp.o
 OFILES += utils.o
+OFILES += server.o
 
 
 CPPFLAGS = -O3 -I  -Wall
