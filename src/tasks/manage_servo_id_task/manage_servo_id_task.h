@@ -4,6 +4,17 @@
 
 class ManagaServoIDTask {
 public:
+	enum Cmd{
+		GetIDCmd,
+		SetIDCmd
+	};
+
+	enum State {
+		NoneState,
+		CompleteState,
+		ErrorState,
+	};
+
 	struct InputStore {
 		int cmd;
 		int param;
@@ -15,7 +26,7 @@ public:
 
 	struct DataStore{
 		InputStore input;
-		OutputStore input;
+		OutputStore output;
 	} store;
 
 	bool init();
