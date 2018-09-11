@@ -1,8 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include "hardware_serial.h"
-// #include <sys/types.h>
-// #include <sys/stat.h>
 #include <fcntl.h>
 #include <termios.h>
 #include <string.h>
