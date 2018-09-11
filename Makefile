@@ -7,7 +7,7 @@ VPATH += :./src/model
 VPATH += :./src/serial_servo_rp
 VPATH += :./src/server
 VPATH += :./src/utils
-
+VPATH += :./src/tasks/manage_servo_id_task
 
 OFILES += main.o
 OFILES += node.o
@@ -16,7 +16,7 @@ OFILES += hardware_serial.o
 OFILES += serial_servo_rp.o
 OFILES += utils.o
 OFILES += server.o
-
+OFILES += manage_servo_id_task.o
 
 CPPFLAGS = -O3 -I  -Wall
 LDFLAGS = -ldl
