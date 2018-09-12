@@ -55,6 +55,59 @@ static uint8_t LobotCheckSum(uint8_t buf[]) {
 	return i;
 }
 
+static int receive_handle(Serial &serial_x, uint8_t *ret) {
+	bool frameStarted = false;
+	bool receiveFinished = false;
+	uint8_t frameCount = 0;
+	uint8_t dataCount = 0;
+	uint8_t dataLength = 2;
+	uint8_t rxBuf;
+	uint8_t recvBuf[32];
+	uint8_t i;
+
+	while (serial_x.available()) {
+		rxBuf = serial_x.read();
+		delay_microseconds(100);
+
+		if (!frameStarted) {
+			if (rxBuf == LOBOT_SERVO_FRAME_HEADER) {
+				frameCount++;
+				if (frameCount == 2) {
+					frameCount = 0;
+					frameStarted = true;
+					dataCount = 1;
+				}
+			}
+			else {
+				frameStarted = false;
+				dataCount = 0;
+				frameCount = 0;
+			}
+		}
+		if (frameStarted) {
+			recvBuf[dataCount] = (uint8_t)rxBuf;
+			if (dataCount == 3) {
+				dataLength = recvBuf[dataCount];
+				if (dataLength < 3 || dataCount > 7) {
+					dataLength = 2;
+					frameStarted = false;
+				}
+			}
+			dataCount++;
+			if (dataCount == dataLength + 3) {
+
+				if (LobotCheckSum(recvBuf) == recvBuf[dataCount - 1]) {
+					frameStarted = false;
+					memcpy(ret, recvBuf + 4, dataLength);
+					return 1;
+				}
+				return -1;
+			}
+		}
+	}
+}
+
+
 namespace Servo {
 	void servo_move(Serial &serial_x, uint8_t id, int16_t position, uint16_t time) {
 		fprintf(stderr, "servo_move id:%hhu position:%hd time:%hu\n", id, position, time);
@@ -135,60 +188,6 @@ namespace Servo {
 		serial_x.write(buf, 7);
 	}
 
-
-	int receive_handle(Serial &serial_x, uint8_t *ret) {
-		bool frameStarted = false;
-		bool receiveFinished = false;
-		uint8_t frameCount = 0;
-		uint8_t dataCount = 0;
-		uint8_t dataLength = 2;
-		uint8_t rxBuf;
-		uint8_t recvBuf[32];
-		uint8_t i;
-
-		while (serial_x.available()) {
-			rxBuf = serial_x.read();
-			delay_microseconds(100);
-
-			if (!frameStarted) {
-				if (rxBuf == LOBOT_SERVO_FRAME_HEADER) {
-					frameCount++;
-					if (frameCount == 2) {
-						frameCount = 0;
-						frameStarted = true;
-						dataCount = 1;
-					}
-				}
-				else {
-					frameStarted = false;
-					dataCount = 0;
-					frameCount = 0;
-				}
-			}
-			if (frameStarted) {
-				recvBuf[dataCount] = (uint8_t)rxBuf;
-				if (dataCount == 3) {
-					dataLength = recvBuf[dataCount];
-					if (dataLength < 3 || dataCount > 7) {
-						dataLength = 2;
-						frameStarted = false;
-					}
-				}
-				dataCount++;
-				if (dataCount == dataLength + 3) {
-
-					if (LobotCheckSum(recvBuf) == recvBuf[dataCount - 1]) {
-						frameStarted = false;
-						memcpy(ret, recvBuf + 4, dataLength);
-						return 1;
-					}
-					return -1;
-				}
-			}
-		}
-	}
-
-
 	int16_t read_position(Serial &serial_x, uint8_t id) {
 		int count = 10000;
 		int16_t ret;
@@ -225,14 +224,7 @@ namespace Servo {
 		buf[3] = 3;
 		buf[4] = LOBOT_SERVO_VIN_READ;
 		buf[5] = LobotCheckSum(buf);
-
 		serial_x.write(buf, 6);
-
-		while (!serial_x.available()) {
-			count -= 1;
-			if (count < 0)
-				return -2048;
-		}
 
 		if (receive_handle(serial_x, buf) > 0) {
 			return BYTE_TO_HW(buf[2], buf[1]);
@@ -240,7 +232,7 @@ namespace Servo {
 		return -2048;
 	}
 
-	int lobot_serial_limit_write(Serial &serial_x, uint8_t id, uint16_t min_angle, uint16_t max_angle) {
+	int limit_write(Serial &serial_x, uint8_t id, uint16_t min_angle, uint16_t max_angle) {
 		if (max_angle == 0) {
 			std::cerr << "lobot_serial_limit_write warning max_angle:" << max_angle << " changed to 1" << std::endl;
 			max_angle = 1;
@@ -265,7 +257,23 @@ namespace Servo {
 		return serial_x.write(buf, sizeof(buf));
 	}
 
-	int lobot_serial_limit_read(Serial &serial_x, uint8_t id, uint16_t & min_angle, uint16_t & max_angle) {
-		return 0;
+	int limit_read(Serial &serial_x, uint8_t id, uint16_t & min_angle, uint16_t & max_angle) {
+		int count = 10000;
+		int16_t ret;
+		uint8_t buf[6];
+
+		buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
+		buf[2] = id;
+		buf[3] = 3;
+		buf[4] = LOBOT_SERVO_ANGLE_LIMIT_READ;
+		buf[5] = LobotCheckSum(buf);
+		serial_x.write(buf, 6);
+
+		if (receive_handle(serial_x, buf) > 0) {
+			min_angle = BYTE_TO_HW(buf[2], buf[1]);
+			max_angle = BYTE_TO_HW(buf[4], buf[3]);
+			return 0;
+		}
+		return 1;
 	}
 }

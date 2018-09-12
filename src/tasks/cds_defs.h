@@ -9,8 +9,15 @@ namespace ManagaServoTaskNS {
 		NoneCmd,
 		ResetAddressesCmd,
 		SetAddressCmd,
+		ResetLimmits,
 		SetMinLimmitCmd,
 		SetMaxLimmitCmd,
+		LoadServosCmd,
+		UnloadServosCmd,
+		EnableSteringCmd,
+		DisableSteringCmd,
+		EnableReadAngles,
+		DisableReadAngles
 	};
 
 	enum State {
@@ -36,5 +43,21 @@ namespace ManagaServoTaskNS {
 	};
 };
 
+struct LimmitDesc {
+	uint16_t value;
+	bool active;
+};
+
+struct ServoLinkDesc {
+	uint8_t servo_id;
+	int model_part_id;
+	LimmitDesc min;
+	LimmitDesc max;
+};
+
+//contain servos links desc
+extern ServoLinkDesc servo_links[12];
+
+//store for manage_servo_task
 extern ManagaServoTaskNS::Store managa_servo_task_store;
 #endif //_CDS_DEFS_H_
