@@ -2,7 +2,7 @@
 #include <string.h>
 #include "manage_servo_task.h"
 #include "serial.h"
-#include "serial_servo_rp.h"
+#include "servo_proto.h"
 
 ManagaServoTaskNS::Store managa_servo_task_store;
 extern Serial serial;
@@ -18,14 +18,14 @@ bool ManagaServoTask::proc() {
 
 	if (cmd == ManagaServoTaskNS::ResetAddressesCmd) {
 		//reset all address
-		LobotSerialServoSetID(serial, 0xFE, 1);
+		Servo::set_id(serial, 0xFE, 1);
 
 		//unload all servos
-		LobotSerialServoUnload(serial, 0xFE);
+		Servo::unload(serial, 0xFE);
 		managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
 	} else if (cmd == ManagaServoTaskNS::SetAddressCmd) {
-		LobotSerialServoSetID(serial, 0xFE, managa_servo_task_store.input.address);
+		Servo::set_id(serial, 0xFE, managa_servo_task_store.input.address);
 	} else if (cmd == ManagaServoTaskNS::SetMinLimmitCmd) {
-		LobotSerialServoSetID(serial, 0xFE, managa_servo_task_store.input.address);
+		Servo::set_id(serial, 0xFE, managa_servo_task_store.input.address);
 	}
 }

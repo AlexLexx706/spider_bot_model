@@ -3,7 +3,7 @@
 #include <signal.h>
 #include "spider_bot.h"
 #include "serial.h"
-#include "serial_servo_rp.h"
+#include "servo_proto.h"
 #include "server.h"
 #include "common_defs.h"
 
