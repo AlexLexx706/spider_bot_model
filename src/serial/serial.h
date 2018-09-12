@@ -2,12 +2,12 @@
 #define _HARDWARE_SERIAL_H_
 #include <stdint.h>
 
-class HardwareSerial {
+class Serial {
 	int fd;
 	int read_res;
 public:
-	HardwareSerial();
-	~HardwareSerial();
+	Serial();
+	~Serial();
 	bool open(const char * port_path);
 	bool close();
 	int write(const uint8_t * buf, int size);

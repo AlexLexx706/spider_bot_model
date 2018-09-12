@@ -1,16 +1,16 @@
 #include <assert.h>
 #include <stdio.h>
-#include "hardware_serial.h"
+#include "serial.h"
 #include <fcntl.h>
 #include <termios.h>
 #include <string.h>
 #include <unistd.h>
 
-HardwareSerial::HardwareSerial():fd(-1), read_res(-1) {
+Serial::Serial():fd(-1), read_res(-1) {
 
 }
 
-bool HardwareSerial::open(const char * port_path) {
+bool Serial::open(const char * port_path) {
 	fprintf(stderr, "open port_path:%s\n", port_path);
 
 	if (fd != -1) {
@@ -53,7 +53,7 @@ bool HardwareSerial::open(const char * port_path) {
 	return true;
 }
 
-bool HardwareSerial::close() {
+bool Serial::close() {
 	if (fd == -1) {
 		fprintf(stderr, "port not open\n");
 		return false;
@@ -66,19 +66,19 @@ bool HardwareSerial::close() {
 	return true;
 }
 
-HardwareSerial::~HardwareSerial() {
+Serial::~Serial() {
 	if (fd != -1) {
 		::close(fd);
 	}
 }
 
-int HardwareSerial::write(const uint8_t * buf, int size) {
+int Serial::write(const uint8_t * buf, int size) {
 	assert(fd != -1);
 	int res = ::write(fd, buf, size);
 	return res;
 }
 
-int HardwareSerial::available() {
+int Serial::available() {
 	assert(fd != -1);
 	if (read_res != -1) {
 		return 1;
@@ -87,7 +87,7 @@ int HardwareSerial::available() {
 	return res;
 }
 
-int HardwareSerial::read() {
+int Serial::read() {
 	assert(fd != -1);
 	int tmp = read_res;
 	read_res = -1;

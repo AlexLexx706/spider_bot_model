@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <signal.h>
 #include "spider_bot.h"
-#include "hardware_serial.h"
+#include "serial.h"
 #include "serial_servo_rp.h"
 #include "server.h"
 #include "common_defs.h"
@@ -10,8 +10,10 @@
 static long period = long(1./30. * 1e9L);
 static int port = 8888;
 static bool exit_flag = false;
-SpiderBot<FLOAT> bot;
 static Server server;
+
+SpiderBot<FLOAT> bot;
+Serial serial;
 
 //exist programm
 void sig_handler(int signo) {
