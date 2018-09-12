@@ -17,12 +17,15 @@ bool ManagaServoTask::proc() {
 	ManagaServoTaskNS::Cmd cmd = managa_servo_task_store.input.cmd;
 
 	if (cmd == ManagaServoTaskNS::ResetAddressesCmd) {
+		//reset all address
 		LobotSerialServoSetID(serial, 0xFE, 1);
+
+		//unload all servos
+		LobotSerialServoUnload(serial, 0xFE);
 		managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
 	} else if (cmd == ManagaServoTaskNS::SetAddressCmd) {
 		LobotSerialServoSetID(serial, 0xFE, managa_servo_task_store.input.address);
 	} else if (cmd == ManagaServoTaskNS::SetMinLimmitCmd) {
 		LobotSerialServoSetID(serial, 0xFE, managa_servo_task_store.input.address);
 	}
-
 }

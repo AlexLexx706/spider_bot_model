@@ -3,7 +3,7 @@
 #include "serial_servo_rp.h"
 #include "serial.h"
 #include "utils.h"
-
+#include <iostream>
 
 #define GET_LOW_BYTE(A) (uint8_t)((A))
 //Macro function	get lower 8 bits of A
@@ -119,7 +119,6 @@ void LobotSerialServoLoad(Serial &serial_x, uint8_t id) {
 	buf[4] = LOBOT_SERVO_LOAD_OR_UNLOAD_WRITE;
 	buf[5] = 1;
 	buf[6] = LobotCheckSum(buf);
-	
 	serial_x.write(buf, 7);
 }
 
@@ -190,8 +189,6 @@ int LobotSerialServoReceiveHandle(Serial &serial_x, uint8_t *ret) {
 
 
 int16_t LobotSerialServoReadPosition(Serial &serial_x, uint8_t id) {
-	fprintf(stderr, "LobotSerialServoReadPosition id:%hhu\n", id);
-
 	int count = 10000;
 	int16_t ret;
 	uint8_t buf[6];
@@ -222,8 +219,6 @@ int16_t LobotSerialServoReadPosition(Serial &serial_x, uint8_t id) {
 }
 
 int16_t LobotSerialServoReadVin(Serial &serial_x, uint8_t id) {
-	fprintf(stderr, "LobotSerialServoReadVin id:%hhu\n", id);
-
 	int count = 10000;
 	int16_t ret;
 	uint8_t buf[6];
@@ -251,6 +246,36 @@ int16_t LobotSerialServoReadVin(Serial &serial_x, uint8_t id) {
 		return -2048;
 	}
 }
+
+int lobot_serial_limit_write(Serial &serial_x, uint8_t id, uint16_t min_angle, uint16_t max_angle) {
+	if (max_angle == 0) {
+		std::cerr << "lobot_serial_limit_write warning max_angle:" << max_angle << " changed to 1" << std::endl;
+		max_angle = 1;
+	}
+
+	if (min_angle >= max_angle) { 
+		std::cerr << "lobot_serial_limit_write warning min_angle:" << min_angle << " >= max_angle:" << max_angle << " changed to:";
+		min_angle = max_angle - 1;
+		std::cerr << min_angle << std::endl;
+	}
+
+	uint8_t buf[10];
+	buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
+	buf[2] = id;
+	buf[3] = 7;
+	buf[4] = LOBOT_SERVO_ANGLE_LIMIT_WRITE;
+	buf[5] = (uint8_t)min_angle;
+	buf[6] = (uint8_t)(min_angle >> 8);
+	buf[7] = (uint8_t)max_angle;
+	buf[8] = (uint8_t)(max_angle >> 8);
+	buf[9] = LobotCheckSum(buf);
+	return serial_x.write(buf, sizeof(buf));
+}
+
+int lobot_serial_limit_read(Serial &serial_x, uint8_t id, uint16_t & min_angle, uint16_t & max_angle) {
+	return 0;
+}
+
 
 // void setup() {
 // 	// put your setup code here, to run once:

@@ -13,5 +13,8 @@ void LobotSerialServoUnload(Serial &serial_x, uint8_t id);
 int16_t LobotSerialServoReadPosition(Serial &serial_x, uint8_t id);
 int16_t LobotSerialServoReadVin(Serial &serial_x, uint8_t id);
 
+int lobot_serial_limit_write(Serial &serial_x, uint8_t id, uint16_t min_angle, uint16_t max_angle);
+int lobot_serial_limit_read(Serial &serial_x, uint8_t id, uint16_t & min_angle, uint16_t & max_angle);
+
 
 #endif //_SERIAL_SERVO_RP_H_
