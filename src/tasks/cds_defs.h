@@ -22,8 +22,9 @@ namespace ManagaServoTaskNS {
 
 	enum State {
 		NoneState,
-		ProgressState,
+		ReadAnglesState,
 		CompleteState,
+		ErrorWrongAddress,
 		ErrorState,
 	};
 
@@ -44,15 +45,17 @@ namespace ManagaServoTaskNS {
 };
 
 struct LimmitDesc {
-	uint16_t value;
+	uint16_t servo_value;
+	FLOAT model_value;
 	bool active;
 };
 
 struct ServoLinkDesc {
-	uint8_t servo_id;
-	int model_part_id;
+	bool active;
 	LimmitDesc min;
 	LimmitDesc max;
+	uint16_t servo_angle;
+	FLOAT model_angle;
 };
 
 //contain servos links desc

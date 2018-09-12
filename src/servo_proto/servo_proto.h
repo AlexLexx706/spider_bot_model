@@ -10,8 +10,8 @@ namespace Servo {
 	void set_mode(Serial &serial_x, uint8_t id, uint8_t Mode, int16_t Speed);
 	void load(Serial &serial_x, uint8_t id);
 	void unload(Serial &serial_x, uint8_t id);
-	int16_t read_position(Serial &serial_x, uint8_t id);
-	int16_t read_vin(Serial &serial_x, uint8_t id);
+	uint16_t read_position(Serial &serial_x, uint8_t id);
+	uint16_t read_vin(Serial &serial_x, uint8_t id);
 	int limit_write(Serial &serial_x, uint8_t id, uint16_t min_angle, uint16_t max_angle);
 	int limit_read(Serial &serial_x, uint8_t id, uint16_t & min_angle, uint16_t & max_angle);
 }

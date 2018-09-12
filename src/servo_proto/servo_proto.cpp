@@ -188,9 +188,7 @@ namespace Servo {
 		serial_x.write(buf, 7);
 	}
 
-	int16_t read_position(Serial &serial_x, uint8_t id) {
-		int count = 10000;
-		int16_t ret;
+	uint16_t read_position(Serial &serial_x, uint8_t id) {
 		uint8_t buf[6];
 
 		buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
@@ -198,15 +196,7 @@ namespace Servo {
 		buf[3] = 3;
 		buf[4] = LOBOT_SERVO_POS_READ;
 		buf[5] = LobotCheckSum(buf);
-
 		serial_x.write(buf, 6);
-
-		while (!serial_x.available()) {
-			count -= 1;
-			if (count < 0) {
-				return -1;
-			}
-		}
 
 		if (receive_handle(serial_x, buf) > 0) {
 			return BYTE_TO_HW(buf[2], buf[1]);
@@ -214,9 +204,7 @@ namespace Servo {
 		return -1;
 	}
 
-	int16_t read_vin(Serial &serial_x, uint8_t id) {
-		int count = 10000;
-		int16_t ret;
+	uint16_t read_vin(Serial &serial_x, uint8_t id) {
 		uint8_t buf[6];
 
 		buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;

@@ -5,7 +5,7 @@
 class ManagaServoTask {
 public:
 	bool init();
-	bool proc();
+	void proc();
 };
 
 #endif
