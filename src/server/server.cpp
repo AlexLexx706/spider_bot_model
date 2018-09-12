@@ -8,8 +8,9 @@
 extern SpiderBot<FLOAT> bot;
 
 
-Server::Server():sock(-1) {
-
+Server::Server():
+	sock(-1),
+	last_cmd(UNKNOWN_CMD) {
 }
 
 Server::~Server() {

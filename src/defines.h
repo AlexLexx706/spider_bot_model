@@ -1,6 +1,7 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 #include "vmath.h"
+#include <stdint.h>
 
 enum Action { 
     NOT_MOVE = 0,
@@ -11,12 +12,14 @@ enum Action {
     FRONT_RIGHT_TEST = 5,
 };
 
-enum Cmd{
+enum Cmd {
 	UNKNOWN_CMD = -1,
 	CMD_GET_STATE = 0,
 	CMD_SET_ACTION = 1,
 	CMD_ADD_NOTIFY = 2,
-	CMD_RM_NOTIFY = 3
+	CMD_RM_NOTIFY = 3,
+	CMD_MANAGE_SERVO = 4
+
 };
 
 enum Error {
@@ -30,13 +33,13 @@ enum Error {
 
 
 struct Header {
-	int cmd;
-	unsigned int size; 
+	int32_t cmd;
+	uint32_t size; 
 };
 
 struct ResHeader {
 	Header header;
-	int error;
+	int32_t error;
 };
 
 template<class T>
@@ -57,22 +60,28 @@ struct GetStateRes {
 	LegDesc<T> front_left_leg;
 	LegDesc<T> rear_right_leg;
 	LegDesc<T> rear_left_leg;
-	int action; 
+	int32_t action; 
 };
 
 struct SetActionCmd {
 	Header headr;
-	int action;
+	int32_t action;
 };
 
 struct AddNotifyCmd {
 	Header header;
-	unsigned short port;
+	uint16_t port;
 };
 
 struct RmNotifyCmd {
 	Header header;
-	unsigned short port;
+	uint16_t port;
 };
+
+struct ManageServoCmd {
+	Header header;
+	uint16_t port;
+};
+
 
 #endif // _DEFINES_H_
