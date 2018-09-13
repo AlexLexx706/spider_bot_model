@@ -12,7 +12,7 @@ namespace Servo {
 	void unload(Serial &serial_x, uint8_t id);
 	uint16_t read_position(Serial &serial_x, uint8_t id);
 	uint16_t read_vin(Serial &serial_x, uint8_t id);
-	int limit_write(Serial &serial_x, uint8_t id, uint16_t min_angle, uint16_t max_angle);
+	bool limit_write(Serial &serial_x, uint8_t id, uint16_t min_angle, uint16_t max_angle);
 	int limit_read(Serial &serial_x, uint8_t id, uint16_t & min_angle, uint16_t & max_angle);
 }
 

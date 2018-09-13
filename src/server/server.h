@@ -19,7 +19,7 @@ class Server {
 	//used for notify clients
 	typedef std::list<sockaddr_in> notify_list_t;
 	notify_list_t notify_list;
-	bool manage_servo_flag;
+	const char * post_processing_cmd;
 
 	int cmd_handler(
 		const void * in_data, uint32_t in_size,

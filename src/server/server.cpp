@@ -20,7 +20,7 @@ static int reply(Cmd cmd, Error error, void * out_data, int max_out_size) {
 
 Server::Server():
 	sock(-1),
-	manage_servo_flag(false) {
+	post_processing_cmd(NULL) {
 }
 
 Server::~Server() {
@@ -112,21 +112,32 @@ bool Server::post_process() {
 	}
 
 	//send result after manage servos 
-	if (manage_servo_flag) {
-		manage_servo_flag = false;
-		if (sendto(
-				sock,
+	if (post_processing_cmd != NULL) {
+		const Header * header(reinterpret_cast<const Header *>(post_processing_cmd));
+
+		// 1. process servo manage command result
+		if (header->cmd == CMD_MANAGE_SERVO) {
+			int reply_len = reply(
+				static_cast<Cmd>(header->cmd),
+				managa_servo_task_store.output.state != ManagaServoTaskNS::CompleteState ? UNKNOWN_ERROR : NO_ERROR,
 				out_buffer,
-				reply(
-					CMD_MANAGE_SERVO,
-					managa_servo_task_store.output.state != ManagaServoTaskNS::CompleteState ? UNKNOWN_ERROR : NO_ERROR,
-					out_buffer,
-					sizeof(out_buffer)),
-				0,
-				(struct sockaddr*) &si_other,
-				slen) == -1) {
-			perror("sendto");
+				sizeof(out_buffer));
+			//send reply
+			if (sendto(sock, out_buffer, reply_len, 0, (struct sockaddr*) &si_other, slen) == -1) {
+				perror("sendto");
+			}
+		// 2 other commands
+		} else {
+			int reply_len = reply(
+				static_cast<Cmd>(header->cmd),
+				UNKNOWN_ERROR,
+				out_buffer,
+				sizeof(out_buffer));
+			if (sendto(sock, out_buffer, reply_len, 0, (struct sockaddr*) &si_other, slen) == -1) {
+				perror("sendto");
+			}
 		}
+		post_processing_cmd = NULL;
 	}
 
 	//send notify to clients
@@ -155,7 +166,7 @@ bool Server::post_process() {
 int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data, uint32_t max_out_size, const sockaddr_in & addr) {
 	assert(in_data && in_size && max_out_size);
 	const Header * header(static_cast<const Header *>(in_data));
-	manage_servo_flag = false;
+	post_processing_cmd = NULL;
 
 	//1. check in buffer size
 	if (in_size < sizeof(Header)) {
@@ -182,12 +193,12 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 			}
 
 			//set data for cds
-			const ManageServoCmd * cmd_data(static_cast<const ManageServoCmd *>(in_data));
+			post_processing_cmd = static_cast<const char *>(in_data);
+			const ManageServoCmd * cmd_data(reinterpret_cast<const ManageServoCmd *>(post_processing_cmd));
 			managa_servo_task_store.input.cmd = static_cast<ManagaServoTaskNS::Cmd>(cmd_data->cmd);
 			managa_servo_task_store.input.address = cmd_data->address;
 			managa_servo_task_store.input.limmit = cmd_data->limmit;
-			manage_servo_flag = true;
-			break;
+			return 0;
 		}
 		case CMD_ADD_NOTIFY: {
 			if (in_size < sizeof(AddNotifyCmd)) {

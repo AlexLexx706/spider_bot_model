@@ -220,16 +220,15 @@ namespace Servo {
 		return -2048;
 	}
 
-	int limit_write(Serial &serial_x, uint8_t id, uint16_t min_angle, uint16_t max_angle) {
+	bool limit_write(Serial &serial_x, uint8_t id, uint16_t min_angle, uint16_t max_angle) {
 		if (max_angle == 0) {
-			std::cerr << "lobot_serial_limit_write warning max_angle:" << max_angle << " changed to 1" << std::endl;
-			max_angle = 1;
+			std::cerr << "limit_write warning max_angle == 0" << std::endl;
+			return false;
 		}
 
 		if (min_angle >= max_angle) { 
-			std::cerr << "lobot_serial_limit_write warning min_angle:" << min_angle << " >= max_angle:" << max_angle << " changed to:";
-			min_angle = max_angle - 1;
-			std::cerr << min_angle << std::endl;
+			std::cerr << "limit_write warning min_angle:" << min_angle << " >= max_angle:" << max_angle << std::endl;
+			return false;
 		}
 
 		uint8_t buf[10];
@@ -242,7 +241,8 @@ namespace Servo {
 		buf[7] = (uint8_t)max_angle;
 		buf[8] = (uint8_t)(max_angle >> 8);
 		buf[9] = LobotCheckSum(buf);
-		return serial_x.write(buf, sizeof(buf));
+		serial_x.write(buf, sizeof(buf));
+		return true;
 	}
 
 	int limit_read(Serial &serial_x, uint8_t id, uint16_t & min_angle, uint16_t & max_angle) {

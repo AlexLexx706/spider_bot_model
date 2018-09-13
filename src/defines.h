@@ -34,18 +34,18 @@ enum Error {
 };
 
 
-struct Header {
+struct __attribute__((__packed__)) Header {
 	int32_t cmd;
 	uint32_t size; 
 };
 
-struct ResHeader {
+struct __attribute__((__packed__)) ResHeader {
 	Header header;
 	int32_t error;
 };
 
 template<class T>
-struct LegDesc {
+struct  LegDesc {
 	Vector3<T> pos;
 	T shoulder_offset;
 	T shoulder_lenght;
@@ -65,22 +65,22 @@ struct GetStateRes {
 	int32_t action; 
 };
 
-struct SetActionCmd {
+struct __attribute__((__packed__)) SetActionCmd {
 	Header headr;
 	int32_t action;
 };
 
-struct AddNotifyCmd {
+struct __attribute__((__packed__)) AddNotifyCmd {
 	Header header;
 	uint16_t port;
 };
 
-struct RmNotifyCmd {
+struct __attribute__((__packed__)) RmNotifyCmd {
 	Header header;
 	uint16_t port;
 };
 
-struct ManageServoCmd {
+struct __attribute__((__packed__)) ManageServoCmd {
 	Header header;
 	uint8_t cmd;
 	uint8_t address;

@@ -17,14 +17,19 @@ namespace ManagaServoTaskNS {
 		EnableSteringCmd,
 		DisableSteringCmd,
 		EnableReadAngles,
-		DisableReadAngles
+		DisableReadAngles,
+		MoveServo,
+		MoveServoSin
 	};
 
 	enum State {
 		NoneState,
 		ReadAnglesState,
+		MoveSinState,
 		CompleteState,
 		ErrorWrongAddress,
+		ErrorWrondData,
+		ErrorNotCalibrated,
 		ErrorState,
 	};
 
