@@ -50,8 +50,7 @@ void ManagaServoTask::proc() {
 			Servo::set_id(serial, 0xFE, managa_servo_task_store.input.address);
 			Servo::unload(serial, managa_servo_task_store.input.address);
 			servo_links[managa_servo_task_store.input.address].active = true;
-			servo_links[managa_servo_task_store.input.address].min.active = false;
-			servo_links[managa_servo_task_store.input.address].max.active = false;
+			servo_links[managa_servo_task_store.input.address].calibrated = false;
 			managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
 			return;
 		}
@@ -61,100 +60,102 @@ void ManagaServoTask::proc() {
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
 				return;
 			}
+
+			if (!servo_links[managa_servo_task_store.input.address].active) {
+				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorNotActive;
+				return;
+			}
 			fprintf(stderr, "ResetLimmits 2. address:%d\n", managa_servo_task_store.input.address);
 
 			//unload servo
 			Servo::unload(serial, managa_servo_task_store.input.address);
-			servo_links[managa_servo_task_store.input.address].min.active = false;
-			servo_links[managa_servo_task_store.input.address].max.active = false;
+			servo_links[managa_servo_task_store.input.address].calibrated = false;
 			managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
 			return;
 		}
-		case ManagaServoTaskNS::SetMinLimmitCmd: {
-			fprintf(stderr, "SetMinLimmitCmd 1.\n");
+		case ManagaServoTaskNS::StartCalibration: {
+			fprintf(stderr, "StartCalibration 1.\n");
 
 			if (managa_servo_task_store.input.address < 0 || managa_servo_task_store.input.address >= sizeof(servo_links) / sizeof(servo_links[0])) {
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
 				return;
 			}
-			fprintf(
-				stderr,
-				"SetMinLimmitCmd 2. address:%d limmit:%f\n",
-				managa_servo_task_store.input.address,
-				managa_servo_task_store.input.limmit);
+			fprintf(stderr, "StartCalibration 2.\n");
 
-			//1. read pos
-			servo_links[managa_servo_task_store.input.address].min.servo_value =
-				Servo::read_position(serial, managa_servo_task_store.input.address);
 
-			uint16_t tmp;
-			Servo::limit_read(
-				serial,
-				managa_servo_task_store.input.address,
-				tmp,
-				servo_links[managa_servo_task_store.input.address].max.servo_value);
-			if (!Servo::limit_write(
-					serial,
-					managa_servo_task_store.input.address,
-					servo_links[managa_servo_task_store.input.address].min.servo_value,
-					servo_links[managa_servo_task_store.input.address].max.servo_value)) {
-				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrondData;
+			if (!servo_links[managa_servo_task_store.input.address].active) {
+				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorNotActive;
 				return;
 			}
 
-			servo_links[managa_servo_task_store.input.address].min.active = true;
-			servo_links[managa_servo_task_store.input.address].min.model_value = managa_servo_task_store.input.limmit;
-			managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
-
+			//1. read pos
+			start_calibration_data.servo_value = Servo::read_position(serial, managa_servo_task_store.input.address);
+			start_calibration_data.model_value = managa_servo_task_store.input.value; 
+			servo_links[managa_servo_task_store.input.address].calibrated = false;
+			managa_servo_task_store.output.state = ManagaServoTaskNS::CalibrationProgressState;
 			fprintf(
 				stderr,
-				"SetMaxLimmitCmd 3. min.active:%d min.servo_value:%d min.model_value:%f\n",
-				servo_links[managa_servo_task_store.input.address].min.active,
-				servo_links[managa_servo_task_store.input.address].min.servo_value,
-				servo_links[managa_servo_task_store.input.address].min.model_value);
-
-
+				"StartCalibration 2. address:%d model_value:%f servo_value:%d\n",
+				managa_servo_task_store.input.address,
+				start_calibration_data.model_value,
+				start_calibration_data.servo_value);
 			return;
 		}
-		case ManagaServoTaskNS::SetMaxLimmitCmd: {
-			fprintf(stderr, "SetMaxLimmitCmd 1.\n");
+		case ManagaServoTaskNS::CompliteCalibration: {
+			fprintf(stderr, "CompliteCalibration 1.\n");
+			if (managa_servo_task_store.output.state != ManagaServoTaskNS::CalibrationProgressState) {
+				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorNotCalibrated;
+				return;
+			}
+
+			fprintf(stderr, "CompliteCalibration 2.\n");
 
 			if (managa_servo_task_store.input.address < 0 || managa_servo_task_store.input.address >= sizeof(servo_links) / sizeof(servo_links[0])) {
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
 				return;
 			}
+
+			fprintf(stderr, "CompliteCalibration 3.\n");
+
+			if (!servo_links[managa_servo_task_store.input.address].active) {
+				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorNotActive;
+				return;
+			}
+
 			fprintf(
 				stderr,
-				"SetMaxLimmitCmd 2. address:%d limmit:%f\n",
+				"CompliteCalibration 4. address:%d value:%f\n",
 				managa_servo_task_store.input.address,
-				managa_servo_task_store.input.limmit);
+				managa_servo_task_store.input.value);
 
 			//1. read pos
-			servo_links[managa_servo_task_store.input.address].max.servo_value =
-				Servo::read_position(serial, managa_servo_task_store.input.address);
+			uint16_t servo_value = Servo::read_position(serial, managa_servo_task_store.input.address);
+			uint16_t min = servo_value > start_calibration_data.servo_value ? start_calibration_data.servo_value : servo_value;
+			uint16_t max = servo_value > start_calibration_data.servo_value ? servo_value : start_calibration_data.servo_value;
 
-			uint16_t tmp;
-			Servo::limit_read(
-				serial,
-				managa_servo_task_store.input.address,
-				servo_links[managa_servo_task_store.input.address].min.servo_value,
-				tmp);
 			if (!Servo::limit_write(
 					serial,
 					managa_servo_task_store.input.address,
-					servo_links[managa_servo_task_store.input.address].min.servo_value,
-					servo_links[managa_servo_task_store.input.address].max.servo_value)) {
+					min,
+					max)) {
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrondData;
 				return;
 			}
 
-			servo_links[managa_servo_task_store.input.address].max.active = true;
-			servo_links[managa_servo_task_store.input.address].max.model_value = managa_servo_task_store.input.limmit;
+			servo_links[managa_servo_task_store.input.address].calibrated = true;
+			servo_links[managa_servo_task_store.input.address].min.servo_value = start_calibration_data.servo_value;
+			servo_links[managa_servo_task_store.input.address].min.model_value = start_calibration_data.model_value;
+
+			servo_links[managa_servo_task_store.input.address].max.servo_value = servo_value;
+			servo_links[managa_servo_task_store.input.address].max.model_value = managa_servo_task_store.input.value;
+			servo_links[managa_servo_task_store.input.address].max.model_value = managa_servo_task_store.input.value;
 			managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
+
 			fprintf(
 				stderr,
-				"SetMaxLimmitCmd 3. max.active:%d max.servo_value:%d max.model_value:%f\n",
-				servo_links[managa_servo_task_store.input.address].max.active,
+				"CompliteCalibration 4. min.servo_value:%d min.model_value:%f max.servo_value:%d max.model_value:%f\n",
+				servo_links[managa_servo_task_store.input.address].min.servo_value,
+				servo_links[managa_servo_task_store.input.address].min.model_value,
 				servo_links[managa_servo_task_store.input.address].max.servo_value,
 				servo_links[managa_servo_task_store.input.address].max.model_value);
 
@@ -193,18 +194,17 @@ void ManagaServoTask::proc() {
 				stderr,
 				"MoveServo 2. address:%d angle:%f\n",
 				managa_servo_task_store.input.address,
-				managa_servo_task_store.input.limmit);
+				managa_servo_task_store.input.value);
 
 			//check servo is calibrated
-			if (!(servo_links[managa_servo_task_store.input.address].max.active &&
-				servo_links[managa_servo_task_store.input.address].min.active)) {
+			if (!servo_links[managa_servo_task_store.input.address].calibrated) {
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorNotCalibrated;
 				return;
 			}
 
 			const LimmitDesc & min(servo_links[managa_servo_task_store.input.address].min);
 			const LimmitDesc & max(servo_links[managa_servo_task_store.input.address].max);
-			FLOAT tmp = (managa_servo_task_store.input.limmit - min.model_value) /  (max.model_value - min.model_value);
+			FLOAT tmp = (managa_servo_task_store.input.value - min.model_value) /  (max.model_value - min.model_value);
 
 			uint16_t servo_pos = (max.servo_value - min.servo_value) * tmp + min.servo_value;
 			fprintf(stderr, "MoveServo 3. servo_pos:%d\n", servo_pos);
@@ -222,11 +222,10 @@ void ManagaServoTask::proc() {
 				stderr,
 				"MoveServoSin 2. address:%d angle:%f\n",
 				managa_servo_task_store.input.address,
-				managa_servo_task_store.input.limmit);
+				managa_servo_task_store.input.value);
 
 			//check servo is calibrated
-			if (!(servo_links[managa_servo_task_store.input.address].max.active &&
-				servo_links[managa_servo_task_store.input.address].min.active)) {
+			if (!servo_links[managa_servo_task_store.input.address].calibrated) {
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorNotCalibrated;
 				return;
 			}
@@ -253,7 +252,7 @@ void ManagaServoTask::proc() {
 	if (managa_servo_task_store.output.state == ManagaServoTaskNS::ReadAnglesState) {
 		for (int i = 0; i < sizeof(servo_links) / sizeof(servo_links[1]); i++) {
 			//check servo calibrated and 
-			if (servo_links[i].active && servo_links[i].min.active && servo_links[i].max.active) {
+			if (servo_links[i].calibrated) {
 				servo_links[i].servo_angle = Servo::read_position(serial, i);
 				servo_links[i].model_angle =
 					((servo_links[i].servo_angle - servo_links[i].min.servo_value) /

@@ -10,8 +10,8 @@ namespace ManagaServoTaskNS {
 		ResetAddressesCmd,
 		SetAddressCmd,
 		ResetLimmits,
-		SetMinLimmitCmd,
-		SetMaxLimmitCmd,
+		StartCalibration,
+		CompliteCalibration,
 		LoadServosCmd,
 		UnloadServosCmd,
 		EnableSteringCmd,
@@ -26,17 +26,20 @@ namespace ManagaServoTaskNS {
 		NoneState,
 		ReadAnglesState,
 		MoveSinState,
+		CalibrationProgressState,
 		CompleteState,
+
+		ErrorState,
+		ErrorNotActive,
 		ErrorWrongAddress,
 		ErrorWrondData,
 		ErrorNotCalibrated,
-		ErrorState,
 	};
 
 	struct Input {
 		Cmd cmd;
 		uint8_t address;
-		FLOAT limmit;
+		FLOAT value;
 	};
 
 	struct Output {
@@ -52,11 +55,11 @@ namespace ManagaServoTaskNS {
 struct LimmitDesc {
 	uint16_t servo_value;
 	FLOAT model_value;
-	bool active;
 };
 
 struct ServoLinkDesc {
 	bool active;
+	bool calibrated;
 	LimmitDesc min;
 	LimmitDesc max;
 	uint16_t servo_angle;

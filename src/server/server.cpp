@@ -117,9 +117,13 @@ bool Server::post_process() {
 
 		// 1. process servo manage command result
 		if (header->cmd == CMD_MANAGE_SERVO) {
+			Error error = (
+				(managa_servo_task_store.output.state > ManagaServoTaskNS::NoneState) &&
+				(managa_servo_task_store.output.state < ManagaServoTaskNS::ErrorState)) ? NO_ERROR  : UNKNOWN_ERROR;
+
 			int reply_len = reply(
 				static_cast<Cmd>(header->cmd),
-				managa_servo_task_store.output.state != ManagaServoTaskNS::CompleteState ? UNKNOWN_ERROR : NO_ERROR,
+				error,
 				out_buffer,
 				sizeof(out_buffer));
 			//send reply
@@ -197,7 +201,7 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 			const ManageServoCmd * cmd_data(reinterpret_cast<const ManageServoCmd *>(post_processing_cmd));
 			managa_servo_task_store.input.cmd = static_cast<ManagaServoTaskNS::Cmd>(cmd_data->cmd);
 			managa_servo_task_store.input.address = cmd_data->address;
-			managa_servo_task_store.input.limmit = cmd_data->limmit;
+			managa_servo_task_store.input.value = cmd_data->value;
 			return 0;
 		}
 		case CMD_ADD_NOTIFY: {

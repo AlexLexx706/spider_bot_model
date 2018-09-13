@@ -84,7 +84,7 @@ struct __attribute__((__packed__)) ManageServoCmd {
 	Header header;
 	uint8_t cmd;
 	uint8_t address;
-	FLOAT limmit;
+	FLOAT value;
 };
 
 
