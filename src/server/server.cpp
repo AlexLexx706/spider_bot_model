@@ -31,11 +31,12 @@ Server::~Server() {
 	}
 }
 
-bool Server::start(uint16_t port) {
+bool Server::start(uint16_t _port) {
 	if (sock != -1) {
 		fprintf(stderr, "server already started\n");
 		return false;
 	}
+	port = _port;
 	struct sockaddr_in si_me;
 	//create a UDP socket
 	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
@@ -87,6 +88,12 @@ bool Server::process() {
 	if ((recv_len = recvfrom(sock, in_buffer, sizeof(in_buffer), 0, (struct sockaddr *) &si_other, &slen)) == -1) {
 		if (errno != EAGAIN && errno != EWOULDBLOCK) {
 			perror("recvfrom()");
+			//try recreate service
+			if (errno == EBADF) {
+				fprintf(stderr, "restart server\n");
+				close();
+				start(port);
+			}
 			return false;
 		}
 	// 3.2 read data

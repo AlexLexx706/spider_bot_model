@@ -32,29 +32,10 @@ int main() {
 	if (!serial.open("/dev/ttyUSB0")) {
 		return 1;
 	}
+
 	if (!manage_servo_task.init()) {
 		return 1;
 	}
-
-
-	// int16_t res = Servo::read_position(serial, 1);
-	// std::cerr << "servo pos:" << res << std::endl;
-	// return 1;
-	// uint16_t min, max;
-	// res = Servo::limit_write(serial, 1, 20, 500);
-	// res = Servo::limit_read(serial, 1, min, max);
-	// // Servo::servo_move(serial, 1, 10, 1000);
-	// fprintf(stderr, "limit_read res:%hu min:%hu max:%hu\n", res, min, max);
-	// return 1;
-	// res = LobotSerialServoReadVin(hs, 1);
-	// fprintf(stderr, "servo vin:%hd\n", res);
-
-	// LobotSerialServoMove(hs, 1, 1000, 1000);
-
-	// res = LobotSerialServoReadPosition(hs, 1);
-	// fprintf(stderr, "servo pos:%hd\n", res);
-	// return 0;
-
 	if (!server.start(port)) {
 		return 1;
 	}
@@ -83,7 +64,7 @@ int main() {
 		server.post_process();
 		abs_dt += get_time_sec() - start_time;
 
-		if (false && ++count == FREQ) {
+		if (++count == FREQ) {
 			fprintf(
 				stderr,
 				"cur_duration:%f max_duration:%f load:%f%%\n",

@@ -15,6 +15,7 @@ class Server {
 	socklen_t slen;
 	char in_buffer[BUFLEN];
 	char out_buffer[BUFLEN];
+	uint16_t port;
 
 	//used for notify clients
 	typedef std::list<sockaddr_in> notify_list_t;

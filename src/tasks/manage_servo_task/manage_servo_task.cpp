@@ -220,7 +220,7 @@ void ManagaServoTask::proc() {
 			}
 			fprintf(
 				stderr,
-				"MoveServoSin 2. address:%d angle:%f\n",
+				"MoveServoSin 2. address:%d period:%f\n",
 				managa_servo_task_store.input.address,
 				managa_servo_task_store.input.value);
 
@@ -233,21 +233,6 @@ void ManagaServoTask::proc() {
 			sin_period = managa_servo_task_store.input.value; 
 			managa_servo_task_store.output.state = ManagaServoTaskNS::MoveSinState;
 			return;
-		}
-		case ManagaServoTaskNS::ReadRaw: {
-			fprintf(stderr, "ReadRaw 1.\n");
-
-			if (managa_servo_task_store.input.address < 0 || managa_servo_task_store.input.address >= sizeof(servo_links) / sizeof(servo_links[0])) {
-				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
-				return;
-			}
-
-			fprintf(stderr, "ReadRaw 2.\n");
-			if (!servo_links[managa_servo_task_store.input.address].active) {
-				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorNotActive;
-				return;
-			}
-			managa_servo_task_store.output.state = ManagaServoTaskNS::ReadRawState;
 		}
 	}
 
@@ -265,8 +250,7 @@ void ManagaServoTask::proc() {
 	}
 
 	//read angles
-	if (managa_servo_task_store.output.state == ManagaServoTaskNS::ReadAnglesState ||
-		managa_servo_task_store.output.state == ManagaServoTaskNS::ReadRawState) {
+	if (managa_servo_task_store.output.state == ManagaServoTaskNS::ReadAnglesState) {
 		for (int i = 0; i < sizeof(servo_links) / sizeof(servo_links[1]); i++) {
 			//check servo calibrated and 
 			if (servo_links[i].active) {
@@ -278,7 +262,13 @@ void ManagaServoTask::proc() {
 						FLOAT(servo_links[i].max.servo_value - servo_links[i].min.servo_value)) * (
 							servo_links[i].max.model_value - servo_links[i].min.model_value) + servo_links[i].min.model_value;
 				}
-				fprintf(stderr, "servo_%d row_angle:%d model_angle:%f\n", i, servo_links[i].servo_angle, servo_links[i].model_angle); 
+				fprintf(
+					stderr,
+					"servo_%d calibrated:%d row_angle:%d model_angle:%f\n",
+					i,
+					servo_links[i].calibrated,
+					servo_links[i].servo_angle,
+					servo_links[i].model_angle); 
 			}
 		}
 	}
