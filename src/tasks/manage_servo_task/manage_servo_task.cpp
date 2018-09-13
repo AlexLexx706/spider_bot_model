@@ -1,22 +1,69 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <unistd.h>
+#include <stdio.h>
+
 #include "cds_defs.h"
 #include "manage_servo_task.h"
 #include "serial.h"
 #include "servo_proto.h"
 #include "utils.h"
-
-
+ 
 ManagaServoTaskNS::Store managa_servo_task_store;
 ServoLinkDesc servo_links[12];
 extern Serial serial;
+extern const char * links_data_file_path;
 	
 bool ManagaServoTask::init() {
 	memset(&managa_servo_task_store, 0, sizeof(managa_servo_task_store));
 	memset(&servo_links, 0, sizeof(servo_links));
+
+	//read links data from file
+	read_links();	
 	return true;
 }
+
+void ManagaServoTask::read_links() {
+	FILE * fd = fopen(links_data_file_path, "rb");
+	if (fd != NULL) {
+		int res = fread(servo_links, 1, sizeof(servo_links), fd);
+		if (res != sizeof(servo_links)) {
+			fprintf(stderr, "wrong links file res: %d not equal:%d\n", res, sizeof(servo_links));
+			memset(&servo_links, 0, sizeof(servo_links));
+		} else {
+			for (int i = 0; i < sizeof(servo_links) / sizeof(servo_links[1]); i++) {
+				if (servo_links[i].calibrated) {
+					uint16_t min = servo_links[i].min.servo_value > servo_links[i].max.servo_value ? servo_links[i].max.servo_value : servo_links[i].min.servo_value;
+					uint16_t max = servo_links[i].min.servo_value > servo_links[i].max.servo_value ? servo_links[i].min.servo_value : servo_links[i].max.servo_value;
+
+					if (!Servo::limit_write(
+							serial,
+							i,
+							min,
+							max)) {
+					}
+				}
+			}
+		}
+		fclose(fd);
+	} else {
+		fprintf(stderr, "read_links 5. links_data_file:%s not exist\n", links_data_file_path);
+	}
+
+}
+void ManagaServoTask::save_links() {
+	FILE * fd = fopen(links_data_file_path, "wb");
+
+	if (fd) {
+		int res = fwrite(servo_links, 1, sizeof(servo_links), fd);
+		if (res != sizeof(servo_links)) {
+			fprintf(stderr, "wrong links file\n");
+		}
+		fclose(fd);
+	}
+}
+
 
 void ManagaServoTask::proc() {
 	ManagaServoTaskNS::Cmd cmd = managa_servo_task_store.input.cmd;
@@ -34,6 +81,7 @@ void ManagaServoTask::proc() {
 
 			// reset links
 			memset(&servo_links, 0, sizeof(servo_links));
+			save_links();
 			managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
 			return;
 		}
@@ -52,6 +100,7 @@ void ManagaServoTask::proc() {
 			servo_links[managa_servo_task_store.input.address].active = true;
 			servo_links[managa_servo_task_store.input.address].calibrated = false;
 			managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
+			save_links();
 			return;
 		}
 		case ManagaServoTaskNS::ResetLimmits: {
@@ -71,6 +120,7 @@ void ManagaServoTask::proc() {
 			Servo::unload(serial, managa_servo_task_store.input.address);
 			servo_links[managa_servo_task_store.input.address].calibrated = false;
 			managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
+			save_links();
 			return;
 		}
 		case ManagaServoTaskNS::StartCalibration: {
@@ -99,6 +149,7 @@ void ManagaServoTask::proc() {
 				managa_servo_task_store.input.address,
 				start_calibration_data.model_value,
 				start_calibration_data.servo_value);
+			save_links();
 			return;
 		}
 		case ManagaServoTaskNS::CompliteCalibration: {
@@ -158,7 +209,7 @@ void ManagaServoTask::proc() {
 				servo_links[managa_servo_task_store.input.address].min.model_value,
 				servo_links[managa_servo_task_store.input.address].max.servo_value,
 				servo_links[managa_servo_task_store.input.address].max.model_value);
-
+			save_links();
 			return;
 		}
 		case ManagaServoTaskNS::LoadServosCmd: {

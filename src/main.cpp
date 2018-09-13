@@ -15,6 +15,7 @@ static int port = 8888;
 static bool exit_flag = false;
 static Server server;
 
+const char * links_data_file_path = "links.bin";
 SpiderBot<FLOAT> bot;
 Serial serial;
 ManagaServoTask manage_servo_task;
