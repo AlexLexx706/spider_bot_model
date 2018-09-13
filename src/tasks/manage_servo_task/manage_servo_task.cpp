@@ -230,8 +230,24 @@ void ManagaServoTask::proc() {
 				return;
 			}
 
+			sin_period = managa_servo_task_store.input.value; 
 			managa_servo_task_store.output.state = ManagaServoTaskNS::MoveSinState;
 			return;
+		}
+		case ManagaServoTaskNS::ReadRaw: {
+			fprintf(stderr, "ReadRaw 1.\n");
+
+			if (managa_servo_task_store.input.address < 0 || managa_servo_task_store.input.address >= sizeof(servo_links) / sizeof(servo_links[0])) {
+				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
+				return;
+			}
+
+			fprintf(stderr, "ReadRaw 2.\n");
+			if (!servo_links[managa_servo_task_store.input.address].active) {
+				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorNotActive;
+				return;
+			}
+			managa_servo_task_store.output.state = ManagaServoTaskNS::ReadRawState;
 		}
 	}
 
@@ -240,7 +256,7 @@ void ManagaServoTask::proc() {
 		const LimmitDesc & min(servo_links[managa_servo_task_store.input.address].min);
 		const LimmitDesc & max(servo_links[managa_servo_task_store.input.address].max);
 
-		FLOAT sin_value = (sin(get_time_sec() * 10) + 1.0) / 2.0;
+		FLOAT sin_value = (sin(get_time_sec() * sin_period) + 1.0) / 2.0;
 		FLOAT model_value = (max.model_value - min.model_value) * sin_value +  min.model_value;
 		FLOAT tmp = (model_value - min.model_value) /  (max.model_value - min.model_value);
 		uint16_t servo_pos = (max.servo_value - min.servo_value) * tmp + min.servo_value;
@@ -249,19 +265,20 @@ void ManagaServoTask::proc() {
 	}
 
 	//read angles
-	if (managa_servo_task_store.output.state == ManagaServoTaskNS::ReadAnglesState) {
+	if (managa_servo_task_store.output.state == ManagaServoTaskNS::ReadAnglesState ||
+		managa_servo_task_store.output.state == ManagaServoTaskNS::ReadRawState) {
 		for (int i = 0; i < sizeof(servo_links) / sizeof(servo_links[1]); i++) {
 			//check servo calibrated and 
-			if (servo_links[i].calibrated) {
+			if (servo_links[i].active) {
 				servo_links[i].servo_angle = Servo::read_position(serial, i);
-				servo_links[i].model_angle =
-					((servo_links[i].servo_angle - servo_links[i].min.servo_value) /
-					FLOAT(servo_links[i].max.servo_value - servo_links[i].min.servo_value)) * (
-						servo_links[i].max.model_value - servo_links[i].min.model_value) + servo_links[i].min.model_value;
+
+				if (servo_links[i].calibrated) {
+					servo_links[i].model_angle =
+						((servo_links[i].servo_angle - servo_links[i].min.servo_value) /
+						FLOAT(servo_links[i].max.servo_value - servo_links[i].min.servo_value)) * (
+							servo_links[i].max.model_value - servo_links[i].min.model_value) + servo_links[i].min.model_value;
+				}
 				fprintf(stderr, "servo_%d row_angle:%d model_angle:%f\n", i, servo_links[i].servo_angle, servo_links[i].model_angle); 
-			} else {
-				servo_links[i].servo_angle = servo_links[i].min.servo_value;
-				servo_links[i].model_angle = servo_links[i].min.model_value;
 			}
 		}
 	}

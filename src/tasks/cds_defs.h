@@ -19,7 +19,8 @@ namespace ManagaServoTaskNS {
 		EnableReadAngles,
 		DisableReadAngles,
 		MoveServo,
-		MoveServoSin
+		MoveServoSin,
+		ReadRaw
 	};
 
 	enum State {
@@ -28,6 +29,7 @@ namespace ManagaServoTaskNS {
 		MoveSinState,
 		CalibrationProgressState,
 		CompleteState,
+		ReadRawState,
 
 		ErrorState,
 		ErrorNotActive,
