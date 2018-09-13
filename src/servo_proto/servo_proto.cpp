@@ -110,7 +110,7 @@ static int receive_handle(Serial &serial_x, uint8_t *ret) {
 
 namespace Servo {
 	void servo_move(Serial &serial_x, uint8_t id, int16_t position, uint16_t time) {
-		fprintf(stderr, "servo_move id:%hhu position:%hd time:%hu\n", id, position, time);
+		// fprintf(stderr, "servo_move id:%hhu position:%hd time:%hu\n", id, position, time);
 
 		uint8_t buf[10];
 		if(position < 0)

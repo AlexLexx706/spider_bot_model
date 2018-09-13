@@ -8,9 +8,9 @@
 #include "server.h"
 #include "common_defs.h"
 #include "manage_servo_task.h"
+#include "utils.h"
 
-
-static long period = long(1./30. * 1e9L);
+static long period = long(1. / FREQ * 1e9L);
 static int port = 8888;
 static bool exit_flag = false;
 static Server server;
@@ -62,9 +62,14 @@ int main() {
 	struct timespec t;
 	clock_gettime(CLOCK_MONOTONIC ,&t);
 
+	double start_time;
+	int count = 0;
+	double abs_dt = 0.0;
+
 	while(not exit_flag) {
 		clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &t, NULL);
 		
+		start_time = get_time_sec();
 		// 1. step
 		bot.step();
 
@@ -76,6 +81,18 @@ int main() {
 		
 		// 3. send task results and notifys
 		server.post_process();
+		abs_dt += get_time_sec() - start_time;
+
+		if (++count == FREQ) {
+			fprintf(
+				stderr,
+				"cur_duration:%f max_duration:%f load:%f%%\n",
+				abs_dt / count,
+				1.0 / FREQ,
+				((abs_dt / count) / (1.0 / FREQ)) * 100);
+			abs_dt = 0.0;
+			count = 0;
+		}
 
 		// 3. update times
 		t.tv_nsec += period;

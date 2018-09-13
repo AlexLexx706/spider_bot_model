@@ -241,17 +241,16 @@ void ManagaServoTask::proc() {
 		const LimmitDesc & min(servo_links[managa_servo_task_store.input.address].min);
 		const LimmitDesc & max(servo_links[managa_servo_task_store.input.address].max);
 
-		FLOAT sin_value = (sin(get_time_sec() * 1) + 1.0) / 2.0;
+		FLOAT sin_value = (sin(get_time_sec() * 10) + 1.0) / 2.0;
 		FLOAT model_value = (max.model_value - min.model_value) * sin_value +  min.model_value;
 		FLOAT tmp = (model_value - min.model_value) /  (max.model_value - min.model_value);
 		uint16_t servo_pos = (max.servo_value - min.servo_value) * tmp + min.servo_value;
 		// fprintf(stderr, "move_sin sin_value:%f model_value:%f servo_pos:%d\n", sin_value, model_value, servo_pos);
-		Servo::servo_move(serial, managa_servo_task_store.input.address, servo_pos, 0);
+		Servo::servo_move(serial, managa_servo_task_store.input.address, servo_pos, (1.0 / FREQ * 1000));
 	}
 
 	//read angles
-	if (managa_servo_task_store.output.state == ManagaServoTaskNS::ReadAnglesState ||
-			managa_servo_task_store.output.state == ManagaServoTaskNS::MoveSinState) {
+	if (managa_servo_task_store.output.state == ManagaServoTaskNS::ReadAnglesState) {
 		for (int i = 0; i < sizeof(servo_links) / sizeof(servo_links[1]); i++) {
 			//check servo calibrated and 
 			if (servo_links[i].active && servo_links[i].min.active && servo_links[i].max.active) {
@@ -260,7 +259,7 @@ void ManagaServoTask::proc() {
 					((servo_links[i].servo_angle - servo_links[i].min.servo_value) /
 					FLOAT(servo_links[i].max.servo_value - servo_links[i].min.servo_value)) * (
 						servo_links[i].max.model_value - servo_links[i].min.model_value) + servo_links[i].min.model_value;
-				// fprintf(stderr, "servo_%d row_angle:%d model_angle:%f\n", i, servo_links[i].servo_angle, servo_links[i].model_angle); 
+				fprintf(stderr, "servo_%d row_angle:%d model_angle:%f\n", i, servo_links[i].servo_angle, servo_links[i].model_angle); 
 			} else {
 				servo_links[i].servo_angle = servo_links[i].min.servo_value;
 				servo_links[i].model_angle = servo_links[i].min.model_value;
