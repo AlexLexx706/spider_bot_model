@@ -4,13 +4,23 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
+#include "cds_defs.h"
 
 extern SpiderBot<FLOAT> bot;
+
+//create reply packet
+static int reply(Cmd cmd, Error error, void * out_data, int max_out_size) {
+	ResHeader * res(static_cast<ResHeader *>(out_data));
+	res->header.cmd= cmd;
+	res->header.size = sizeof(ResHeader) - sizeof(Header);
+	res->error = error;
+	return sizeof(ResHeader);
+}
 
 
 Server::Server():
 	sock(-1),
-	last_cmd(UNKNOWN_CMD) {
+	manage_servo_flag(false) {
 }
 
 Server::~Server() {
@@ -26,7 +36,7 @@ bool Server::start(uint16_t port) {
 		fprintf(stderr, "server already started\n");
 		return false;
 	}
-	struct sockaddr_in si_me, si_other;
+	struct sockaddr_in si_me;
 	//create a UDP socket
 	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
 		perror("socket");
@@ -83,10 +93,39 @@ bool Server::process() {
 	} else {
 		//rend responce
 		recv_len = cmd_handler(in_buffer, recv_len, out_buffer, sizeof(out_buffer), si_other);
+		
+		//not send empty result
+		if (recv_len != 0) {
+			if (sendto(sock, out_buffer, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1) {
+				perror("sendto()");
+				return false;
+			}
+		}
+	}
+	return true;
+}
 
-		if (sendto(sock, out_buffer, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1) {
-			perror("sendto()");
-			return false;
+bool Server::post_process() {
+	if (sock == -1) {
+		fprintf(stderr, "server not started\n");
+		return false;
+	}
+
+	//send result after manage servos 
+	if (manage_servo_flag) {
+		manage_servo_flag = false;
+		if (sendto(
+				sock,
+				out_buffer,
+				reply(
+					CMD_MANAGE_SERVO,
+					managa_servo_task_store.output.state != ManagaServoTaskNS::CompleteState ? UNKNOWN_ERROR : NO_ERROR,
+					out_buffer,
+					sizeof(out_buffer)),
+				0,
+				(struct sockaddr*) &si_other,
+				slen) == -1) {
+			perror("sendto");
 		}
 	}
 
@@ -112,28 +151,16 @@ bool Server::process() {
 	return true;
 }
 
-
-
-//create reply packet
-static int reply(Cmd cmd, Error error, void * out_data, int max_out_size) {
-	ResHeader * res(static_cast<ResHeader *>(out_data));
-	res->header.cmd= cmd;
-	res->header.size = sizeof(ResHeader) - sizeof(Header);
-	res->error = error;
-	return sizeof(ResHeader);
-}
-
-
 //handle command and return result
 int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data, uint32_t max_out_size, const sockaddr_in & addr) {
 	assert(in_data && in_size && max_out_size);
 	const Header * header(static_cast<const Header *>(in_data));
+	manage_servo_flag = false;
 
 	//1. check in buffer size
 	if (in_size < sizeof(Header)) {
 		return reply(UNKNOWN_CMD, WRONG_DATA, out_data, max_out_size);
 	}
-
 	//2. process commands
 	switch (header->cmd) {
 		case CMD_GET_STATE: {
@@ -147,6 +174,19 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 			}
 
 			bot.set_action(static_cast<Action>(static_cast<const SetActionCmd *>(in_data)->action));
+			break;
+		}
+		case CMD_MANAGE_SERVO: {
+			if (in_size < sizeof(ManageServoCmd)) {
+				return reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size);
+			}
+
+			//set data for cds
+			const ManageServoCmd * cmd_data(static_cast<const ManageServoCmd *>(in_data));
+			managa_servo_task_store.input.cmd = static_cast<ManagaServoTaskNS::Cmd>(cmd_data->cmd);
+			managa_servo_task_store.input.address = cmd_data->address;
+			managa_servo_task_store.input.limmit = cmd_data->limmit;
+			manage_servo_flag = true;
 			break;
 		}
 		case CMD_ADD_NOTIFY: {

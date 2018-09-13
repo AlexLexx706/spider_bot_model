@@ -19,18 +19,20 @@ class Server {
 	//used for notify clients
 	typedef std::list<sockaddr_in> notify_list_t;
 	notify_list_t notify_list;
-	Cmd last_cmd;
+	bool manage_servo_flag;
 
 	int cmd_handler(
 		const void * in_data, uint32_t in_size,
 		void * out_data, uint32_t max_out_size,
 		const sockaddr_in & addr);
+
 public:
 	Server();
 	~Server();
 	bool start(uint16_t port);
 	bool close();
 	bool process();
+	bool post_process();
 };
 
 #endif //_SERVER_H_

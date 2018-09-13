@@ -3,6 +3,7 @@
 #include "manage_servo_task.h"
 #include "serial.h"
 #include "servo_proto.h"
+#include <stdio.h>
 
 ManagaServoTaskNS::Store managa_servo_task_store;
 ServoLinkDesc servo_links[12];
@@ -11,12 +12,13 @@ extern Serial serial;
 bool ManagaServoTask::init() {
 	memset(&managa_servo_task_store, 0, sizeof(managa_servo_task_store));
 	memset(&servo_links, 0, sizeof(servo_links));
-	return false;
+	return true;
 }
 
 void ManagaServoTask::proc() {
 	ManagaServoTaskNS::Cmd cmd = managa_servo_task_store.input.cmd;
 	managa_servo_task_store.input.cmd = ManagaServoTaskNS::NoneCmd;
+	// fprintf(stderr, "proc 1. cmd:%d\n", managa_servo_task_store.input.cmd);
 
 	switch (cmd) { 
 		case ManagaServoTaskNS::ResetAddressesCmd: {

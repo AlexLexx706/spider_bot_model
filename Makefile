@@ -1,4 +1,4 @@
-CROSS_COMPILE?=arm-linux-gnueabihf-
+#CROSS_COMPILE?=arm-linux-gnueabihf-
 CXX=$(CROSS_COMPILE)g++
 
 VPATH = :./src

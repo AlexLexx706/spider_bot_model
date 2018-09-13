@@ -1,7 +1,9 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
-#include "vmath.h"
+
 #include <stdint.h>
+#include "vmath.h"
+#include "common_defs.h"
 
 enum Action { 
     NOT_MOVE = 0,
@@ -80,7 +82,9 @@ struct RmNotifyCmd {
 
 struct ManageServoCmd {
 	Header header;
-	uint16_t port;
+	uint8_t cmd;
+	uint8_t address;
+	FLOAT limmit;
 };
 
 
