@@ -10,10 +10,12 @@
 
 template<class T>
 class SpiderBot:Node<T> {
+public:
 	Leg<T> front_right_leg;
 	Leg<T> rear_right_leg;
 	Leg<T> front_left_leg;
 	Leg<T> rear_left_leg;
+private:
 	Vector3<T>front_right_pos;
 	Vector3<T>front_left_pos;
 	Vector3<T>rear_right_pos;
@@ -68,6 +70,7 @@ public:
 
 		front_right_leg.set_parent(this);
 		front_right_leg.set_pos(Vector3<T>(length / 2.0, 0.0, width / 2.0));
+		front_right_leg.print_info = true;
 
 		rear_right_leg.set_parent(this);
 		rear_right_leg.set_pos(Vector3<T>(-length / 2.0, 0.0, width / 2.0));
@@ -82,10 +85,10 @@ public:
 		rear_left_leg.set_angle_y(M_PI);
 
 		//init default leg pos
-		front_right_pos = Vector3<T>(length / 2, -4, width / 2 + 8);
-		front_left_pos = Vector3<T>(length / 2, -4, -(width / 2 + 8));
-		rear_right_pos = Vector3<T>(-length / 2, -4, width / 2 + 8);
-		rear_left_pos = Vector3<T>(-length / 2, -4, -(width / 2 + 8));
+		front_right_pos = Vector3<T>(length / 2, -18, width / 2 + 8);
+		front_left_pos = Vector3<T>(length / 2, -18, -(width / 2 + 8));
+		rear_right_pos = Vector3<T>(-length / 2, -18, width / 2 + 8);
+		rear_left_pos = Vector3<T>(-length / 2, -18, -(width / 2 + 8));
 
 		reset();
 	}

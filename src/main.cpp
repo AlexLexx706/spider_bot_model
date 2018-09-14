@@ -65,7 +65,7 @@ int main() {
 		server.post_process();
 		abs_dt += get_time_sec() - start_time;
 
-		if (++count == FREQ) {
+		if (false && ++count == FREQ) {
 			fprintf(
 				stderr,
 				"cur_duration:%f max_duration:%f load:%f%%\n",

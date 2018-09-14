@@ -2,7 +2,8 @@
 #define LEG_H_
 
 #include "node.h"
-#include <iostream>
+#include <stdio.h>
+// #include <iostream>
 
 #define SHOULDER_OFFSET 2
 #define SHOULDER_LENGHT 10
@@ -20,13 +21,15 @@ public:
 	T forearm_lenght;
 
 public:
+	bool print_info;
 	Leg(
 		T _shoulder_offset=SHOULDER_OFFSET,
 		T _shoulder_lenght=SHOULDER_LENGHT,
 		T _forearm_lenght=FOREARM_LENGHT):
 			shoulder_offset(_shoulder_offset),
 			shoulder_lenght(_shoulder_lenght),
-			forearm_lenght(_forearm_lenght) {
+			forearm_lenght(_forearm_lenght),
+			print_info(false) {
 				p_0.set_parent(this);
 				// p_0.set_angle_z(0.5);
 				p_1.set_parent(&p_0);
@@ -127,19 +130,24 @@ public:
 		//std::cout << "move_end 4. angle:" << angle << std::endl;
 
 		p_2.set_angle_x(M_PI - angle);
+
+		if (print_info) {
+			print();
+		}
 	}
 
 	void print() {
-		std::cout <<
-			" shoulder_offset:" << shoulder_offset <<
-			" shoulder_lenght:" << shoulder_lenght <<
-			" forearm_lenght:" << forearm_lenght <<
-			" pos:" << Leg::get_pos() <<
-			" ang_y:" << Leg::get_angle_y() <<
-			" p_0.ang_y:" << p_0.get_angle_y() <<
-			" p_1.ang_x:" << p_1.get_angle_x() << 
-			" p_2.ang_x:" << p_2.get_angle_x() <<
-			" end_pos:" << end.to_world(Vector3<T>(0, 0, 0)) << std::endl;
+		// std::cout <<
+		// 	" shoulder_offset:" << shoulder_offset <<
+		// 	" shoulder_lenght:" << shoulder_lenght <<
+		// 	" forearm_lenght:" << forearm_lenght <<
+		// 	" pos:" << Leg::get_pos() <<
+		// 	" ang_y:" << Leg::get_angle_y() <<
+		// 	" p_0.ang_y:" << p_0.get_angle_y() <<
+		// 	" p_1.ang_x:" << p_1.get_angle_x() << 
+		// 	" p_2.ang_x:" << p_2.get_angle_x() <<
+		// 	" end_pos:" << end.to_world(Vector3<T>(0, 0, 0)) << std::endl;
+		fprintf(stderr, "p_0.y:%f p_1.x:%f p_2.x:%f\n", p_0.get_angle_y(), p_1.get_angle_x(), p_2.get_angle_x());
 	}
 };
 #endif // LEG_H_

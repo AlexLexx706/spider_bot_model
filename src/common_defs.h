@@ -3,6 +3,6 @@
 
 #define BUFLEN 1024L
 #define FLOAT float
-#define FREQ 10
+#define FREQ 20
 
 #endif
