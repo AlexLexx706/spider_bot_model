@@ -154,7 +154,7 @@ bool Server::post_process() {
 	//send notify to clients
 	if (notify_list.size()) {
 		GetStateRes<FLOAT> bot_state;
-		bot.get_state(bot_state);
+		get_geometry_state(bot_state);
 
 		// 4. send notify
 		for (notify_list_t::iterator iter=notify_list.begin(), end=notify_list.end(); iter != end; iter++) {
@@ -173,6 +173,53 @@ bool Server::post_process() {
 	return true;
 }
 
+size_t Server::get_geometry_state(GetStateRes<FLOAT> & res) {
+	res.header.header.cmd = CMD_GET_STATE;
+	res.header.error = NO_ERROR;
+	res.header.header.size = sizeof(GetStateRes<FLOAT>) - sizeof(Header);
+	
+	// 0. mat
+	res.body_mat = bot.matrix(); 
+	
+	// 1. front_right_leg		
+	res.front_right_leg.pos = bot.front_right_leg.get_pos();
+	res.front_right_leg.shoulder_offset = bot.front_right_leg.shoulder_offset;
+	res.front_right_leg.shoulder_lenght = bot.front_right_leg.shoulder_lenght;
+	res.front_right_leg.forearm_lenght = bot.front_right_leg.forearm_lenght;
+	res.front_right_leg.a_0 = servo_links[0].model_angle;
+	res.front_right_leg.a_1 = servo_links[1].model_angle;
+	res.front_right_leg.a_2 = servo_links[2].model_angle;
+
+	// 2. rear_right_leg		
+	res.rear_right_leg.pos = bot.rear_right_leg.get_pos();
+	res.rear_right_leg.shoulder_offset = bot.rear_right_leg.shoulder_offset;
+	res.rear_right_leg.shoulder_lenght = bot.rear_right_leg.shoulder_lenght;
+	res.rear_right_leg.forearm_lenght = bot.rear_right_leg.forearm_lenght;
+	res.rear_right_leg.a_0 = servo_links[3].model_angle;
+	res.rear_right_leg.a_1 = servo_links[4].model_angle;
+	res.rear_right_leg.a_2 = servo_links[5].model_angle;
+
+	// 2. front_left_leg		
+	res.front_left_leg.pos = bot.front_left_leg.get_pos();
+	res.front_left_leg.shoulder_offset = bot.front_left_leg.shoulder_offset;
+	res.front_left_leg.shoulder_lenght = bot.front_left_leg.shoulder_lenght;
+	res.front_left_leg.forearm_lenght = bot.front_left_leg.forearm_lenght;
+	res.front_left_leg.a_0 = servo_links[6].model_angle;
+	res.front_left_leg.a_1 = servo_links[7].model_angle;
+	res.front_left_leg.a_2 = servo_links[8].model_angle;
+
+
+	// 4.rear_left_leg		
+	res.rear_left_leg.pos = bot.rear_left_leg.get_pos();
+	res.rear_left_leg.shoulder_offset = bot.rear_left_leg.shoulder_offset;
+	res.rear_left_leg.shoulder_lenght = bot.rear_left_leg.shoulder_lenght;
+	res.rear_left_leg.forearm_lenght = bot.rear_left_leg.forearm_lenght;
+	res.rear_left_leg.a_0 = servo_links[9].model_angle;
+	res.rear_left_leg.a_1 = servo_links[10].model_angle;
+	res.rear_left_leg.a_2 = servo_links[11].model_angle;
+	return sizeof(res); 
+}
+
 //handle command and return result
 int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data, uint32_t max_out_size, const sockaddr_in & addr) {
 	assert(in_data && in_size && max_out_size);
@@ -186,8 +233,7 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 	//2. process commands
 	switch (header->cmd) {
 		case CMD_GET_STATE: {
-			bot.get_state(*static_cast<GetStateRes<FLOAT> *>(out_data));
-			return sizeof(GetStateRes<FLOAT>);
+			return get_geometry_state(*static_cast<GetStateRes<FLOAT> *>(out_data));
 			break;
 		}
 		case CMD_SET_ACTION: {

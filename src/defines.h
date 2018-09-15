@@ -50,8 +50,9 @@ struct  LegDesc {
 	T shoulder_offset;
 	T shoulder_lenght;
 	T forearm_lenght;
-	Vector3<T> end;
-	
+	T a_0;
+	T a_1;
+	T a_2;
 };
 
 template<class T>
@@ -62,7 +63,6 @@ struct GetStateRes {
 	LegDesc<T> front_left_leg;
 	LegDesc<T> rear_right_leg;
 	LegDesc<T> rear_left_leg;
-	int32_t action; 
 };
 
 struct __attribute__((__packed__)) SetActionCmd {

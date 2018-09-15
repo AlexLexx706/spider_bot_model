@@ -26,6 +26,7 @@ class Server {
 		const void * in_data, uint32_t in_size,
 		void * out_data, uint32_t max_out_size,
 		const sockaddr_in & addr);
+	size_t get_geometry_state(GetStateRes<FLOAT> & res);
 
 public:
 	Server();

@@ -5,9 +5,9 @@
 #include <stdio.h>
 // #include <iostream>
 
-#define SHOULDER_OFFSET 2
+#define SHOULDER_OFFSET 10
 #define SHOULDER_LENGHT 10
-#define FOREARM_LENGHT 10
+#define FOREARM_LENGHT 5
 
 template<class T>
 class Leg: public Node<T> {
@@ -131,9 +131,9 @@ public:
 
 		p_2.set_angle_x(M_PI - angle);
 
-		if (print_info) {
-			print();
-		}
+		// if (print_info) {
+		// 	print();
+		// }
 	}
 
 	void print() {

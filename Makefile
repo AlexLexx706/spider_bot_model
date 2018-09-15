@@ -10,6 +10,7 @@ VPATH += :./src/utils
 VPATH += :./src/tasks
 VPATH += :./src/tasks/manage_servo_task
 VPATH += :./src/tasks/walk_task
+VPATH += :./src/tasks/save_model_angles_task
 
 OFILES += main.o
 OFILES += node.o
@@ -20,6 +21,9 @@ OFILES += utils.o
 OFILES += server.o
 OFILES += manage_servo_task.o
 OFILES += walk_task.o
+OFILES += save_model_angles_task.o
+OFILES += tasks_utils.o
+
 
 CPPFLAGS = -O3 -I  -Wall
 LDFLAGS = -ldl

@@ -20,7 +20,6 @@ namespace ManagaServoTaskNS {
 		DisableReadAngles,
 		MoveServo,
 		MoveServoSin,
-		EnableSterring
 	};
 
 	enum State {
@@ -71,7 +70,7 @@ struct ServoLinkDesc {
 };
 
 //contain servos links desc
-extern ServoLinkDesc servo_links[12];
+extern ServoLinkDesc servo_links[SERVOS_COUNT];
 
 //store for manage_servo_task
 extern ManagaServoTaskNS::Store managa_servo_task_store;

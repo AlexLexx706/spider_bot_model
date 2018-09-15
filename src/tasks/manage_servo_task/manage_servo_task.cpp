@@ -4,13 +4,12 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <assert.h>
-
 #include "cds_defs.h"
 #include "manage_servo_task.h"
 #include "serial.h"
 #include "servo_proto.h"
 #include "utils.h"
-#include "spider_bot.h"
+#include "tasks_utils.h"
 
 
 #define MAX_LIM 1000
@@ -19,7 +18,7 @@ ManagaServoTaskNS::Store managa_servo_task_store;
 ServoLinkDesc servo_links[12];
 extern Serial serial;
 extern const char * links_data_file_path;
-extern SpiderBot<FLOAT> bot;
+
 	
 bool ManagaServoTask::init() {
 	memset(&managa_servo_task_store, 0, sizeof(managa_servo_task_store));
@@ -79,53 +78,25 @@ static uint16_t model_angle_to_servo_value(uint8_t address, FLOAT model_angle) {
 	FLOAT tmp = (model_angle - min.model_value) /  (max.model_value - min.model_value);
 	uint16_t servo_value = (max.servo_value - min.servo_value) * tmp + min.servo_value;
 
-	fprintf(
-		stderr,
-		"model_angle_to_servo_value address:%d model_angle:%f servo_value:%d"
-		"min.model_value:%f min.servo_value:%d max.model_value:%f max.servo_value:%d\n",
-		address, model_angle, servo_value,
-		min.model_value, min.servo_value,
-		max.model_value, max.servo_value);
+	// fprintf(
+	// 	stderr,
+	// 	"model_angle_to_servo_value address:%d model_angle:%f servo_value:%d"
+	// 	"min.model_value:%f min.servo_value:%d max.model_value:%f max.servo_value:%d\n",
+	// 	address, model_angle, servo_value,
+	// 	min.model_value, min.servo_value,
+	// 	max.model_value, max.servo_value);
 	return servo_value;
 }
 
-static FLOAT get_model_angle(uint8_t address) {
-	switch (address) {
-		case 0:
-			return bot.front_right_leg.p_0.get_angle_y();
-		case 1:
-			return bot.front_right_leg.p_1.get_angle_x();
-		case 2:
-			return bot.front_right_leg.p_2.get_angle_x();
-
-		case 3:
-			return bot.rear_right_leg.p_0.get_angle_y();
-		case 4:
-			return bot.rear_right_leg.p_1.get_angle_x();
-		case 5:
-			return bot.rear_right_leg.p_2.get_angle_x();
-
-		case 6:
-			return bot.front_left_leg.p_0.get_angle_y();
-		case 7:
-			return bot.front_left_leg.p_1.get_angle_x();
-		case 8:
-			return bot.front_left_leg.p_2.get_angle_x();
-
-		case 9:
-			return bot.rear_left_leg.p_0.get_angle_y();
-		case 10:
-			return bot.rear_left_leg.p_1.get_angle_x();
-		case 11:
-			return bot.rear_left_leg.p_2.get_angle_x();
-	}
-	return 0.;
-}
 
 void ManagaServoTask::proc() {
 	ManagaServoTaskNS::Cmd cmd = managa_servo_task_store.input.cmd;
 	managa_servo_task_store.input.cmd = ManagaServoTaskNS::NoneCmd;
-	// fprintf(stderr, "proc 1. cmd:%d\n", managa_servo_task_store.input.cmd);
+
+	// if (managa_servo_task_store.input.cmd != 0) {
+	if (cmd) {
+		fprintf(stderr, "proc 1. cmd:%d\n", cmd);
+	}
 
 	switch (cmd) { 
 		case ManagaServoTaskNS::ResetAddressesCmd: {
@@ -371,7 +342,8 @@ void ManagaServoTask::proc() {
 			managa_servo_task_store.output.state = ManagaServoTaskNS::MoveSinState;
 			return;
 		}
-		case ManagaServoTaskNS::EnableSterring: {
+		case ManagaServoTaskNS::EnableSteringCmd: {
+			fprintf(stderr, "EnableSterring 1.\n");
 			managa_servo_task_store.output.state = ManagaServoTaskNS::SterringsProgress;
 			return;
 		}
@@ -401,24 +373,24 @@ void ManagaServoTask::proc() {
 		Servo::servo_move(serial, managa_servo_task_store.input.address, servo_pos, (1.0 / FREQ * 1000));
 	//3. read angles in progress
 	} else if (managa_servo_task_store.output.state == ManagaServoTaskNS::ReadAnglesState) {
-		for (int i = 0; i < sizeof(servo_links) / sizeof(servo_links[1]); i++) {
-			//check servo calibrated and 
-			if (servo_links[i].active) {
-				servo_links[i].servo_angle = Servo::read_position(serial, i);
+		for (int address = 0; address < SERVOS_COUNT; address++) {
+			//check servo calibrated and
+			if (servo_links[address].active) {
+				servo_links[address].servo_angle = Servo::read_position(serial, address);
 
-				if (servo_links[i].calibrated) {
-					servo_links[i].model_angle =
-						((servo_links[i].servo_angle - servo_links[i].min.servo_value) /
-						FLOAT(servo_links[i].max.servo_value - servo_links[i].min.servo_value)) * (
-							servo_links[i].max.model_value - servo_links[i].min.model_value) + servo_links[i].min.model_value;
+				if (servo_links[address].calibrated) {
+					servo_links[address].model_angle =
+						((servo_links[address].servo_angle - servo_links[address].min.servo_value) /
+						FLOAT(servo_links[address].max.servo_value - servo_links[address].min.servo_value)) * (
+							servo_links[address].max.model_value - servo_links[address].min.model_value) + servo_links[address].min.model_value;
 				}
 				fprintf(
 					stderr,
 					"servo_%d calibrated:%d row_angle:%d model_angle:%f\n",
-					i,
-					servo_links[i].calibrated,
-					servo_links[i].servo_angle,
-					servo_links[i].model_angle); 
+					address,
+					servo_links[address].calibrated,
+					servo_links[address].servo_angle,
+					servo_links[address].model_angle); 
 			}
 		}
 	}

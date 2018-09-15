@@ -9,11 +9,15 @@
 #include "common_defs.h"
 #include "manage_servo_task.h"
 #include "utils.h"
+#include "save_model_angles_task.h"
+
 
 static long period = long(1. / FREQ * 1e9L);
 static int port = 8888;
 static bool exit_flag = false;
 static Server server;
+static SaveModelAnglesTask save_model_angles_task;
+
 
 const char * links_data_file_path = "links.bin";
 SpiderBot<FLOAT> bot;
@@ -37,6 +41,11 @@ int main() {
 	if (!manage_servo_task.init()) {
 		return 1;
 	}
+
+	if (!save_model_angles_task.init()) {
+		return 1;
+	}
+
 	if (!server.start(port)) {
 		return 1;
 	}
@@ -52,17 +61,22 @@ int main() {
 		clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &t, NULL);
 		
 		start_time = get_time_sec();
+
+		// 0. server update
+		server.process();
+
 		// 1. step
 		bot.step();
 
-		// 2. server update
-		server.process();
+		// 2. save model angle
+		save_model_angles_task.proc();
 
 		// 3. process_tasks
 		manage_servo_task.proc();
 		
-		// 3. send task results and notifys
+		// 4. send task results and notifys
 		server.post_process();
+
 		abs_dt += get_time_sec() - start_time;
 
 		if (false && ++count == FREQ) {
@@ -76,7 +90,7 @@ int main() {
 			count = 0;
 		}
 
-		// 3. update times
+		// 6. update times
 		t.tv_nsec += period;
 		while (t.tv_nsec >= 1e9L)
 		{

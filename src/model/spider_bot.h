@@ -3,13 +3,13 @@
 #include "leg.h"
 #include "defines.h"
 
-#define LENGTH 10.
-#define WIDTH 10.
+#define LENGTH 13.
+#define WIDTH 7.
 #define HEIGHT 3.
 
 
 template<class T>
-class SpiderBot:Node<T> {
+class SpiderBot:public Node<T> {
 public:
 	Leg<T> front_right_leg;
 	Leg<T> rear_right_leg;
@@ -70,7 +70,7 @@ public:
 
 		front_right_leg.set_parent(this);
 		front_right_leg.set_pos(Vector3<T>(length / 2.0, 0.0, width / 2.0));
-		front_right_leg.print_info = true;
+		// front_right_leg.print_info = true;
 
 		rear_right_leg.set_parent(this);
 		rear_right_leg.set_pos(Vector3<T>(-length / 2.0, 0.0, width / 2.0));
@@ -85,11 +85,11 @@ public:
 		rear_left_leg.set_angle_y(M_PI);
 
 		//init default leg pos
-		front_right_pos = Vector3<T>(length / 2, -18, width / 2 + 8);
-		front_left_pos = Vector3<T>(length / 2, -18, -(width / 2 + 8));
-		rear_right_pos = Vector3<T>(-length / 2, -18, width / 2 + 8);
-		rear_left_pos = Vector3<T>(-length / 2, -18, -(width / 2 + 8));
-
+		front_right_pos = Vector3<T>(length / 2, -8, (width / 2 + shoulder_offset));
+		front_left_pos = Vector3<T>(length / 2, -8, -(width / 2 + shoulder_offset));
+		rear_right_pos = Vector3<T>(-length / 2, -8, (width / 2 + shoulder_offset));
+		rear_left_pos = Vector3<T>(-length / 2, -8, -(width / 2 + shoulder_offset));
+		std::cerr << "front_right_pos:" << front_right_pos << std::endl;
 		reset();
 	}
 
@@ -113,48 +113,6 @@ public:
 		rear_right_leg.print();
 		front_left_leg.print();
 		rear_left_leg.print();
-	}
-
-	int get_state(GetStateRes<T> & res) {
-		//fill hesder
-		res.header.header.cmd = CMD_GET_STATE;
-		res.header.error = NO_ERROR;
-		res.header.header.size = sizeof(GetStateRes<T>) - sizeof(Header);
-		
-		// 0. mat
-		res.body_mat = SpiderBot::matrix(); 
-		
-		// 1. front_right_leg		
-		res.front_right_leg.pos = front_right_leg.get_pos();
-		res.front_right_leg.shoulder_offset = front_right_leg.shoulder_offset;
-		res.front_right_leg.shoulder_lenght = front_right_leg.shoulder_lenght;
-		res.front_right_leg.forearm_lenght = front_right_leg.forearm_lenght;
-		res.front_right_leg.end = front_right_leg.end.get_g_pos();
-
-		// 2. front_left_leg		
-		res.front_left_leg.pos = front_left_leg.get_pos();
-		res.front_left_leg.shoulder_offset = front_left_leg.shoulder_offset;
-		res.front_left_leg.shoulder_lenght = front_left_leg.shoulder_lenght;
-		res.front_left_leg.forearm_lenght = front_left_leg.forearm_lenght;
-		res.front_left_leg.end = front_left_leg.end.get_g_pos();
-
-		// 3. rear_right_leg		
-		res.rear_right_leg.pos = rear_right_leg.get_pos();
-		res.rear_right_leg.shoulder_offset = rear_right_leg.shoulder_offset;
-		res.rear_right_leg.shoulder_lenght = rear_right_leg.shoulder_lenght;
-		res.rear_right_leg.forearm_lenght = rear_right_leg.forearm_lenght;
-		res.rear_right_leg.end = rear_right_leg.end.get_g_pos();
-
-		// 4.rear_left_leg		
-		res.rear_left_leg.pos = rear_left_leg.get_pos();
-		res.rear_left_leg.shoulder_offset = rear_left_leg.shoulder_offset;
-		res.rear_left_leg.shoulder_lenght = rear_left_leg.shoulder_lenght;
-		res.rear_left_leg.forearm_lenght = rear_left_leg.forearm_lenght;
-		res.rear_left_leg.end = rear_left_leg.end.get_g_pos();
-
-		// 5. action
-		res.action = action;
-		return sizeof(GetStateRes<T>); 
 	}
 
 	void set_action(Action _action) {

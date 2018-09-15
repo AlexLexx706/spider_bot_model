@@ -4,5 +4,5 @@
 #define BUFLEN 1024L
 #define FLOAT float
 #define FREQ 20
-
+#define SERVOS_COUNT 12
 #endif
