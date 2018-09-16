@@ -5,6 +5,13 @@
 #include "vmath.h"
 #include "common_defs.h"
 
+enum LegNum {
+	FRONT_RIGHT_LEG_NUM = 0,
+	REAR_RIGHT_LEG_NUM = 1,
+	FRONT_LEFT_LEG_NUM = 2,
+	REAR_LEFT_LEG_NUM = 3,
+};
+
 enum Action { 
     NOT_MOVE = 0,
     MOVE_FORWARD = 1,
@@ -20,8 +27,8 @@ enum Cmd {
 	CMD_SET_ACTION = 1,
 	CMD_ADD_NOTIFY = 2,
 	CMD_RM_NOTIFY = 3,
-	CMD_MANAGE_SERVO = 4
-
+	CMD_MANAGE_SERVO = 4,
+	CMD_SET_LEG_GEOMETRY = 5
 };
 
 enum Error {
@@ -30,7 +37,6 @@ enum Error {
 	UNKNOWN_ERROR = 2,
 	WRONG_DATA = 3,
 	WRONG_PARAMS = 4,
-
 };
 
 
@@ -45,11 +51,17 @@ struct __attribute__((__packed__)) ResHeader {
 };
 
 template<class T>
-struct  LegDesc {
+struct  LegGeometry {
 	Vector3<T> pos;
 	T shoulder_offset;
 	T shoulder_lenght;
 	T forearm_lenght;
+};
+
+
+template<class T>
+struct  LegDesc {
+	LegGeometry<T> geometry;
 	T a_0;
 	T a_1;
 	T a_2;
@@ -64,6 +76,7 @@ struct GetStateRes {
 	LegDesc<T> rear_right_leg;
 	LegDesc<T> rear_left_leg;
 };
+
 
 struct __attribute__((__packed__)) SetActionCmd {
 	Header headr;
@@ -85,6 +98,12 @@ struct __attribute__((__packed__)) ManageServoCmd {
 	uint8_t cmd;
 	uint8_t address;
 	FLOAT value;
+};
+
+struct SetLegGeometry {
+	Header header;
+	uint8_t leg_num;
+	LegGeometry<FLOAT> geometry;
 };
 
 

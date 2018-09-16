@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "cds_defs.h"
+#include "tasks_utils.h"
 
 extern SpiderBot<FLOAT> bot;
 
@@ -181,39 +182,27 @@ size_t Server::get_geometry_state(GetStateRes<FLOAT> & res) {
 	// 0. mat
 	res.body_mat = bot.matrix(); 
 	
-	// 1. front_right_leg		
-	res.front_right_leg.pos = bot.front_right_leg.get_pos();
-	res.front_right_leg.shoulder_offset = bot.front_right_leg.shoulder_offset;
-	res.front_right_leg.shoulder_lenght = bot.front_right_leg.shoulder_lenght;
-	res.front_right_leg.forearm_lenght = bot.front_right_leg.forearm_lenght;
+	// 1. front_right_leg
+	get_leg_geometry(FRONT_RIGHT_LEG_NUM, res.front_right_leg.geometry);
 	res.front_right_leg.a_0 = servo_links[0].model_angle;
 	res.front_right_leg.a_1 = servo_links[1].model_angle;
 	res.front_right_leg.a_2 = servo_links[2].model_angle;
 
 	// 2. rear_right_leg		
-	res.rear_right_leg.pos = bot.rear_right_leg.get_pos();
-	res.rear_right_leg.shoulder_offset = bot.rear_right_leg.shoulder_offset;
-	res.rear_right_leg.shoulder_lenght = bot.rear_right_leg.shoulder_lenght;
-	res.rear_right_leg.forearm_lenght = bot.rear_right_leg.forearm_lenght;
+	get_leg_geometry(REAR_RIGHT_LEG_NUM, res.rear_right_leg.geometry);
 	res.rear_right_leg.a_0 = servo_links[3].model_angle;
 	res.rear_right_leg.a_1 = servo_links[4].model_angle;
 	res.rear_right_leg.a_2 = servo_links[5].model_angle;
 
 	// 2. front_left_leg		
-	res.front_left_leg.pos = bot.front_left_leg.get_pos();
-	res.front_left_leg.shoulder_offset = bot.front_left_leg.shoulder_offset;
-	res.front_left_leg.shoulder_lenght = bot.front_left_leg.shoulder_lenght;
-	res.front_left_leg.forearm_lenght = bot.front_left_leg.forearm_lenght;
+	get_leg_geometry(FRONT_LEFT_LEG_NUM, res.front_left_leg.geometry);
 	res.front_left_leg.a_0 = servo_links[6].model_angle;
 	res.front_left_leg.a_1 = servo_links[7].model_angle;
 	res.front_left_leg.a_2 = servo_links[8].model_angle;
 
 
 	// 4.rear_left_leg		
-	res.rear_left_leg.pos = bot.rear_left_leg.get_pos();
-	res.rear_left_leg.shoulder_offset = bot.rear_left_leg.shoulder_offset;
-	res.rear_left_leg.shoulder_lenght = bot.rear_left_leg.shoulder_lenght;
-	res.rear_left_leg.forearm_lenght = bot.rear_left_leg.forearm_lenght;
+	get_leg_geometry(REAR_LEFT_LEG_NUM, res.rear_left_leg.geometry);
 	res.rear_left_leg.a_0 = servo_links[9].model_angle;
 	res.rear_left_leg.a_1 = servo_links[10].model_angle;
 	res.rear_left_leg.a_2 = servo_links[11].model_angle;
@@ -308,6 +297,18 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 			notify_list.erase(iter);
 			return reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size);
 		}
+		case CMD_SET_LEG_GEOMETRY: {
+			if (in_size < sizeof(SetLegGeometry)) {
+				return reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size);
+			}
+
+			const SetLegGeometry * leg_geometry(static_cast<const SetLegGeometry *>(in_data));
+			if (!set_leg_geometry(static_cast<LegNum>(leg_geometry->leg_num), leg_geometry->geometry)) {
+				return reply(static_cast<Cmd>(header->cmd), WRONG_PARAMS, out_data, max_out_size);
+			}
+			return reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size);
+		}
+
 	}
 
 	// 3. wrong command repry
