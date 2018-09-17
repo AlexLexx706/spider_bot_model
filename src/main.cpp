@@ -41,9 +41,9 @@ int main() {
 	//load legs geometry
 	load_legs_geometry();
 
-	// if (!serial.open("/dev/ttyUSB0")) {
-	// 	return 1;
-	// }
+	if (!serial.open("/dev/ttyUSB0")) {
+		return 1;
+	}
 
 	if (!manage_servo_task.init()) {
 		return 1;
