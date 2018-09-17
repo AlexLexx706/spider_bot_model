@@ -60,7 +60,7 @@ struct  LegGeometry {
 
 
 template<class T>
-struct  LegDesc {
+struct LegDesc {
 	LegGeometry<T> geometry;
 	T a_0;
 	T a_1;
@@ -102,7 +102,7 @@ struct __attribute__((__packed__)) ManageServoCmd {
 
 struct SetLegGeometry {
 	Header header;
-	uint8_t leg_num;
+	uint32_t leg_num;
 	LegGeometry<FLOAT> geometry;
 };
 
