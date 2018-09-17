@@ -5,4 +5,5 @@
 #define FLOAT float
 #define FREQ 20
 #define SERVOS_COUNT 12
+#define LEGS_COUNT 4
 #endif

@@ -10,6 +10,7 @@
 #include "manage_servo_task.h"
 #include "utils.h"
 #include "save_model_angles_task.h"
+#include "tasks_utils.h"
 
 
 static long period = long(1. / FREQ * 1e9L);
@@ -20,6 +21,8 @@ static SaveModelAnglesTask save_model_angles_task;
 
 
 const char * links_data_file_path = "links.bin";
+const char * LEGS_GEOMETRY_PATH = "legs_geometry.bin";
+
 SpiderBot<FLOAT> bot;
 Serial serial;
 ManagaServoTask manage_servo_task;
@@ -34,6 +37,10 @@ void sig_handler(int signo) {
 
 
 int main() {
+	//save_legs_geometry();
+	//load legs geometry
+	load_legs_geometry();
+
 	if (!serial.open("/dev/ttyUSB0")) {
 		return 1;
 	}

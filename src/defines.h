@@ -106,5 +106,7 @@ struct SetLegGeometry {
 	LegGeometry<FLOAT> geometry;
 };
 
+typedef LegGeometry<FLOAT> LegsGeometryStore[LEGS_COUNT]; 
+
 
 #endif // _DEFINES_H_

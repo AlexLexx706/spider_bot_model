@@ -89,7 +89,7 @@ public:
 		front_left_pos = Vector3<T>(length / 2, -8, -(width / 2 + shoulder_offset));
 		rear_right_pos = Vector3<T>(-length / 2, -8, (width / 2 + shoulder_offset));
 		rear_left_pos = Vector3<T>(-length / 2, -8, -(width / 2 + shoulder_offset));
-		std::cerr << "front_right_pos:" << front_right_pos << std::endl;
+		// std::cerr << "front_right_pos:" << front_right_pos << std::endl;
 		reset();
 	}
 
