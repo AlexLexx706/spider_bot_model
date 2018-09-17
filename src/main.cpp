@@ -38,7 +38,6 @@ void sig_handler(int signo) {
 
 int main() {
 	//save_legs_geometry();
-	//load legs geometry
 	load_legs_geometry();
 
 	if (!serial.open("/dev/ttyUSB0")) {

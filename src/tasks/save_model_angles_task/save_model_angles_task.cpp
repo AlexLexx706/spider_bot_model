@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 bool SaveModelAnglesTask::init() {
-	fprintf(stderr, "SaveModelAnglesTask 1.\n");
 	return true;
 }
 

@@ -10,8 +10,8 @@ class ManagaServoTask {
 	};
 	StartCalibrationData start_calibration_data;
 	FLOAT sin_period;
-	void save_links();
-	void read_links();
+	bool save_links();
+	bool read_links();
 
 public:
 	bool init();

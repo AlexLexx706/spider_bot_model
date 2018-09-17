@@ -5,8 +5,8 @@
 #include <stdio.h>
 // #include <iostream>
 
-#define SHOULDER_OFFSET 10
-#define SHOULDER_LENGHT 10
+#define SHOULDER_OFFSET 8
+#define SHOULDER_LENGHT 8
 #define FOREARM_LENGHT 5
 
 template<class T>

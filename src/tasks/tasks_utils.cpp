@@ -60,6 +60,26 @@ Leg<FLOAT> * get_len_by_num(LegNum num) {
 }
 
 
+Vector3<FLOAT> * get_control_point_by_num(LegNum num) {
+	switch (num) {
+		case FRONT_RIGHT_LEG_NUM: {
+			return &bot.front_right_pos;
+		}
+		case REAR_RIGHT_LEG_NUM: {
+			return &bot.rear_right_pos;
+		}
+		case FRONT_LEFT_LEG_NUM: {
+			return &bot.front_left_pos;
+		}
+		case REAR_LEFT_LEG_NUM: {
+			return &bot.rear_left_pos;
+		}
+	}
+	fprintf(stderr, "leg:%d not exist\n", num);
+	return NULL;	
+}
+
+
 void set_leg_geometry_internal(Leg<FLOAT> & leg, const LegGeometry<FLOAT> & geometry) {
 	leg.set_pos(geometry.pos);
 	leg.set_shoulder_offset(geometry.shoulder_offset);
@@ -67,13 +87,39 @@ void set_leg_geometry_internal(Leg<FLOAT> & leg, const LegGeometry<FLOAT> & geom
 	leg.set_forearm_lenght(geometry.forearm_lenght);
 }
 
+void set_control_point_internal(Vector3<FLOAT> & pos, const LegGeometry<FLOAT> & geometry) {
+	
+	//right
+	if (geometry.pos.z > 0.) {
+		pos = geometry.pos +
+			Vector3<FLOAT>(0.0, -geometry.forearm_lenght * 1.5, geometry.shoulder_offset + geometry.shoulder_lenght * 0.5);
+	//left
+	} else {
+		pos = geometry.pos +
+			Vector3<FLOAT>(0.0, -geometry.forearm_lenght * 1.5, -(geometry.shoulder_offset + geometry.shoulder_lenght * 0.5));
+	}
+	std::cout << "control pos:" <<  pos << std::endl;
+}
+
+
 bool set_leg_geometry(LegNum num, const LegGeometry<FLOAT> & geometry) {
+	fprintf(stderr, "set_leg_geometry 1. num:%d\n", num);
+
 	Leg<FLOAT> * leg = get_len_by_num(static_cast<LegNum>(num));
 	if (leg == NULL) {
 		return false;
 	}
-
+	fprintf(
+		stderr,
+		"set_leg_geometry 2. geometry: pos:%f %f %f "
+		"shoulder_offset:%f, shoulder_lenght:%f, forearm_lenght:%f\n",
+		geometry.pos.x, geometry.pos.y, geometry.pos.z,
+		geometry.shoulder_offset,
+		geometry.shoulder_lenght,
+		geometry.forearm_lenght
+	);
 	set_leg_geometry_internal(*leg, geometry);
+	set_control_point_internal(*get_control_point_by_num(static_cast<LegNum>(num)), geometry);
 	save_legs_geometry();
 }
 
@@ -90,13 +136,15 @@ bool get_leg_geometry(LegNum num, LegGeometry<FLOAT> & geometry) {
 }
 
 bool load_legs_geometry() {
+
 	FILE * fd = fopen(LEGS_GEOMETRY_PATH, "rb");
+
 	if (fd != NULL) {
 		LegsGeometryStore lgs;
 		int res = fread(lgs, 1, sizeof(lgs), fd);
 
 		if (res != sizeof(lgs)) {
-			fprintf(stderr, "wrong legs geometry file res: %d not equal:%zu\n", res, sizeof(lgs));
+			fprintf(stderr, "cannot read leg geometry from file:%s\n", LEGS_GEOMETRY_PATH);
 			fclose(fd);
 			return false;
 		}
@@ -123,15 +171,13 @@ bool save_legs_geometry() {
 	}
 
 	FILE * fd = fopen(LEGS_GEOMETRY_PATH, "wb");
-
 	if (fd) {
 		int res = fwrite(lgs, 1, sizeof(lgs), fd);
 		if (res != sizeof(lgs)) {
-			fprintf(stderr, "cannot save legs geometry\n");
 			return false;
 		}
 		fclose(fd);
 		return true;
-	}	
+	}
 	return false;
 }

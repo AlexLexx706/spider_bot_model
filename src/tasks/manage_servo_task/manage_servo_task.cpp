@@ -29,35 +29,37 @@ bool ManagaServoTask::init() {
 	return true;
 }
 
-void ManagaServoTask::read_links() {
+bool ManagaServoTask::read_links() {
 	FILE * fd = fopen(links_data_file_path, "rb");
 	if (fd != NULL) {
 		int res = fread(servo_links, 1, sizeof(servo_links), fd);
+	
 		if (res != sizeof(servo_links)) {
 			fprintf(stderr, "wrong links file res: %d not equal:%zu\n", res, sizeof(servo_links));
 			memset(&servo_links, 0, sizeof(servo_links));
-		} else {
-			for (int i = 0; i < sizeof(servo_links) / sizeof(servo_links[1]); i++) {
-				if (servo_links[i].calibrated) {
-					uint16_t min = servo_links[i].min.servo_value > servo_links[i].max.servo_value ? servo_links[i].max.servo_value : servo_links[i].min.servo_value;
-					uint16_t max = servo_links[i].min.servo_value > servo_links[i].max.servo_value ? servo_links[i].min.servo_value : servo_links[i].max.servo_value;
+			fclose(fd);
+			return false;
+		}
 
-					if (!Servo::limit_write(
-							serial,
-							i,
-							min,
-							max)) {
-					}
+		for (int i = 0; i < sizeof(servo_links) / sizeof(servo_links[1]); i++) {
+			if (servo_links[i].calibrated) {
+				uint16_t min = servo_links[i].min.servo_value > servo_links[i].max.servo_value ? servo_links[i].max.servo_value : servo_links[i].min.servo_value;
+				uint16_t max = servo_links[i].min.servo_value > servo_links[i].max.servo_value ? servo_links[i].min.servo_value : servo_links[i].max.servo_value;
+
+				if (!Servo::limit_write(
+						serial,
+						i,
+						min,
+						max)) {
 				}
 			}
 		}
 		fclose(fd);
-	} else {
-		fprintf(stderr, "read_links 5. links_data_file:%s not exist\n", links_data_file_path);
 	}
-
+	fprintf(stderr, "links data file:%s not exist\n", links_data_file_path);
 }
-void ManagaServoTask::save_links() {
+
+bool ManagaServoTask::save_links() {
 	FILE * fd = fopen(links_data_file_path, "wb");
 
 	if (fd) {
@@ -66,7 +68,10 @@ void ManagaServoTask::save_links() {
 			fprintf(stderr, "wrong links file\n");
 		}
 		fclose(fd);
+		return true;
 	}
+	fprintf(stderr, "cannot save links data for file:%s\n", links_data_file_path);
+	return false;
 }
 
 

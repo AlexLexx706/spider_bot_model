@@ -3,8 +3,8 @@
 #include "leg.h"
 #include "defines.h"
 
-#define LENGTH 13.
-#define WIDTH 7.
+#define LENGTH 16
+#define WIDTH 8.
 #define HEIGHT 3.
 
 
@@ -15,11 +15,13 @@ public:
 	Leg<T> rear_right_leg;
 	Leg<T> front_left_leg;
 	Leg<T> rear_left_leg;
-private:
+
 	Vector3<T>front_right_pos;
 	Vector3<T>front_left_pos;
 	Vector3<T>rear_right_pos;
 	Vector3<T>rear_left_pos;
+
+private:
 	Action action;
 
 	T HALF_STEP_LEN;
@@ -57,8 +59,8 @@ public:
 			front_left_leg(shoulder_offset, shoulder_lenght, forearm_lenght),
 			rear_left_leg(shoulder_offset, shoulder_lenght, forearm_lenght),
 			action(NOT_MOVE),
-			HALF_STEP_LEN(6.0),
-			MOVE_TIME(0.3),
+			HALF_STEP_LEN(3.0),
+			MOVE_TIME(1),
 			STEP_HEIGHT(4.0),
 			ROTATE_ANGLE(0.5),
 			move_state(-1),
@@ -85,12 +87,18 @@ public:
 		rear_left_leg.set_angle_y(M_PI);
 
 		//init default leg pos
-		front_right_pos = Vector3<T>(length / 2, -8, (width / 2 + shoulder_offset));
-		front_left_pos = Vector3<T>(length / 2, -8, -(width / 2 + shoulder_offset));
-		rear_right_pos = Vector3<T>(-length / 2, -8, (width / 2 + shoulder_offset));
-		rear_left_pos = Vector3<T>(-length / 2, -8, -(width / 2 + shoulder_offset));
-		// std::cerr << "front_right_pos:" << front_right_pos << std::endl;
-		reset();
+		front_right_pos = front_right_leg.get_pos() +
+			Vector3<FLOAT>(0.0, -forearm_lenght * 2, shoulder_offset + shoulder_lenght * 0.5);
+
+		rear_right_pos = rear_right_leg.get_pos() + 
+			Vector3<FLOAT>(0.0, -forearm_lenght * 2, shoulder_offset + shoulder_lenght * 0.5);
+
+		front_left_pos = front_left_leg.get_pos() + 
+			Vector3<FLOAT>(0.0, -forearm_lenght * 2, -(shoulder_offset + shoulder_lenght * 0.5));
+
+		rear_left_pos = rear_left_leg.get_pos() + 
+			Vector3<FLOAT>(0.0, -forearm_lenght * 2, -(shoulder_offset + shoulder_lenght * 0.7));
+  		reset();
 	}
 
 	void reset() {
