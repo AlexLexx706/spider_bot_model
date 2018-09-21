@@ -10,6 +10,7 @@ class ManagaServoTask {
 	};
 	StartCalibrationData start_calibration_data;
 	FLOAT sin_period;
+	uint8_t read_angle_addres;
 	bool save_links();
 	bool read_links();
 

@@ -13,6 +13,7 @@
 
 
 #define MAX_LIM 1000
+#define BROADCAST_ADDR 0xFE
 
 ManagaServoTaskNS::Store managa_servo_task_store;
 ServoLinkDesc servo_links[12];
@@ -109,10 +110,10 @@ void ManagaServoTask::proc() {
 		case ManagaServoTaskNS::ResetAddressesCmd: {
 			fprintf(stderr, "ResetAddressesCmd 1.\n");
 			// reset all address
-			Servo::set_id(serial, 0xFE, 1);
+			Servo::set_id(serial, BROADCAST_ADDR, 1);
 
 			// unload all servos
-			Servo::unload(serial, 0xFE);
+			Servo::unload(serial, BROADCAST_ADDR);
 
 			// reset links
 			memset(&servo_links, 0, sizeof(servo_links));
@@ -123,14 +124,14 @@ void ManagaServoTask::proc() {
 		case ManagaServoTaskNS::SetAddressCmd: {
 			fprintf(stderr, "SetAddressCmd 1.\n");
 
-			if (managa_servo_task_store.input.address >= sizeof(servo_links) / sizeof(servo_links[0])) {
+			if (managa_servo_task_store.input.address >= SERVOS_COUNT) {
 				fprintf(stderr, "SetAddressCmd 2. error: wrong addres:%d\n", managa_servo_task_store.input.address);
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
 				return;
 			}
 
 			fprintf(stderr, "SetAddressCmd 3. address:%d\n", managa_servo_task_store.input.address);
-			Servo::set_id(serial, 0xFE, managa_servo_task_store.input.address);
+			Servo::set_id(serial, BROADCAST_ADDR, managa_servo_task_store.input.address);
 			Servo::unload(serial, managa_servo_task_store.input.address);
 			servo_links[managa_servo_task_store.input.address].active = true;
 			servo_links[managa_servo_task_store.input.address].calibrated = false;
@@ -140,7 +141,7 @@ void ManagaServoTask::proc() {
 		}
 		case ManagaServoTaskNS::ResetLimmits: {
 			fprintf(stderr, "ResetLimmits 1.\n");
-			if (managa_servo_task_store.input.address >= sizeof(servo_links) / sizeof(servo_links[0])) {
+			if (managa_servo_task_store.input.address >= SERVOS_COUNT) {
 				fprintf(stderr, "ResetLimmits 2. error: wrong addres:%d\n", managa_servo_task_store.input.address);
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
 				return;
@@ -163,7 +164,7 @@ void ManagaServoTask::proc() {
 		case ManagaServoTaskNS::StartCalibration: {
 			fprintf(stderr, "StartCalibration 1.\n");
 
-			if (managa_servo_task_store.input.address >= sizeof(servo_links) / sizeof(servo_links[0])) {
+			if (managa_servo_task_store.input.address >= SERVOS_COUNT) {
 				fprintf(stderr, "StartCalibration 2. error: wrong address:%d\n", managa_servo_task_store.input.address);
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
 				return;
@@ -211,7 +212,7 @@ void ManagaServoTask::proc() {
 			}
 
 			fprintf(stderr, "CompliteCalibration 3.\n");
-			if (managa_servo_task_store.input.address >= sizeof(servo_links) / sizeof(servo_links[0])) {
+			if (managa_servo_task_store.input.address >= SERVOS_COUNT) {
 				fprintf(stderr, "CompliteCalibration 4. error: address:%d not set.\n", managa_servo_task_store.input.address);
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
 				return;
@@ -276,19 +277,27 @@ void ManagaServoTask::proc() {
 		}
 		case ManagaServoTaskNS::LoadServosCmd: {
 			fprintf(stderr, "LoadServosCmd 1.\n");
-			Servo::load(serial, 0xFE);
+			Servo::load(serial, BROADCAST_ADDR);
 			managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
 			return;
 		}
 		case ManagaServoTaskNS::UnloadServosCmd: {
 			fprintf(stderr, "UnloadServosCmd 1.\n");
-			Servo::unload(serial, 0xFE);
+			Servo::unload(serial, BROADCAST_ADDR);
 			managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
 			return;
 		}
 		case ManagaServoTaskNS::EnableReadAngles: {
-			fprintf(stderr, "EnableReadAngles 1.\n");
-			managa_servo_task_store.output.state = ManagaServoTaskNS::ReadAnglesState;
+			fprintf(stderr, "EnableReadAngles 1. addr:%d\n", managa_servo_task_store.input.address);
+
+			//check address
+			if (managa_servo_task_store.input.address <  SERVOS_COUNT ||
+					managa_servo_task_store.input.address == BROADCAST_ADDR) {
+				read_angle_addres = managa_servo_task_store.input.address; 
+				managa_servo_task_store.output.state = ManagaServoTaskNS::ReadAnglesState;
+				return;
+			}
+			managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
 			return;
 		}
 		case ManagaServoTaskNS::DisableReadAngles: {
@@ -299,7 +308,7 @@ void ManagaServoTask::proc() {
 		case ManagaServoTaskNS::MoveServo: {
 			fprintf(stderr, "MoveServo 1.\n");
 
-			if (managa_servo_task_store.input.address >= sizeof(servo_links) / sizeof(servo_links[0])) {
+			if (managa_servo_task_store.input.address >= BROADCAST_ADDR) {
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
 				return;
 			}
@@ -329,7 +338,7 @@ void ManagaServoTask::proc() {
 		case ManagaServoTaskNS::MoveServoSin: {
 			fprintf(stderr, "MoveServoSin 1.\n");
 
-			if (managa_servo_task_store.input.address >= sizeof(servo_links) / sizeof(servo_links[0])) {
+			if (managa_servo_task_store.input.address >= SERVOS_COUNT) {
 				managa_servo_task_store.output.state = ManagaServoTaskNS::ErrorWrongAddress;
 				return;
 			}
@@ -382,7 +391,8 @@ void ManagaServoTask::proc() {
 	} else if (managa_servo_task_store.output.state == ManagaServoTaskNS::ReadAnglesState) {
 		for (int address = 0; address < SERVOS_COUNT; address++) {
 			//check servo calibrated and
-			if (servo_links[address].active) {
+			if (servo_links[address].active &&
+					(address == read_angle_addres || read_angle_addres == BROADCAST_ADDR)) {
 				servo_links[address].servo_angle = Servo::read_position(serial, address);
 
 				if (servo_links[address].calibrated) {

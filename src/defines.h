@@ -100,6 +100,13 @@ struct __attribute__((__packed__)) ManageServoCmd {
 	FLOAT value;
 };
 
+
+struct __attribute__((__packed__)) ManageServoRes: public ResHeader {
+	int32_t state;
+};
+
+
+
 struct SetLegGeometry {
 	Header header;
 	uint32_t leg_num;

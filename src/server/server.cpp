@@ -125,17 +125,18 @@ bool Server::post_process() {
 
 		// 1. process servo manage command result
 		if (header->cmd == CMD_MANAGE_SERVO) {
-			Error error = (
+			ManageServoRes * res(reinterpret_cast<ManageServoRes *>(out_buffer));
+
+			//create reply 
+			res->header.cmd = header->cmd;
+			res->header.size = sizeof(ManageServoRes) - sizeof(Header);
+			res->error = (
 				(managa_servo_task_store.output.state > ManagaServoTaskNS::NoneState) &&
 				(managa_servo_task_store.output.state < ManagaServoTaskNS::ErrorState)) ? NO_ERROR  : UNKNOWN_ERROR;
+			res->state = managa_servo_task_store.output.state;
 
-			int reply_len = reply(
-				static_cast<Cmd>(header->cmd),
-				error,
-				out_buffer,
-				sizeof(out_buffer));
 			//send reply
-			if (sendto(sock, out_buffer, reply_len, 0, (struct sockaddr*) &si_other, slen) == -1) {
+			if (sendto(sock, out_buffer, sizeof(ManageServoRes), 0, (struct sockaddr*) &si_other, slen) == -1) {
 				perror("sendto");
 			}
 		// 2 other commands
