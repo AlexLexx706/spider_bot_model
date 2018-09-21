@@ -204,6 +204,7 @@ namespace Servo {
 		if (receive_handle(serial_x, buf) > 0) {
 			return BYTE_TO_HW(buf[2], buf[1]);
 		}
+		fprintf(stderr, "error, cannot read pos from id:%d\n", id);
 		return -1;
 	}
 

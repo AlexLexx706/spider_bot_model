@@ -57,7 +57,7 @@ public:
 			rear_left_leg(shoulder_offset, shoulder_lenght, forearm_lenght),
 			action(NOT_MOVE),
 			HALF_STEP_LEN(3.5),
-			MOVE_TIME(0.6),
+			MOVE_TIME(0.4),
 			STEP_HEIGHT(3.),
 			ROTATE_ANGLE(0.3),
 			move_state(-1),

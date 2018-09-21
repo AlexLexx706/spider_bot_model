@@ -55,8 +55,10 @@ bool ManagaServoTask::read_links() {
 			}
 		}
 		fclose(fd);
+		return true;
 	}
 	fprintf(stderr, "links data file:%s not exist\n", links_data_file_path);
+	return false; 
 }
 
 bool ManagaServoTask::save_links() {
