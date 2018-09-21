@@ -101,10 +101,13 @@ static int receive_handle(Serial &serial_x, uint8_t *ret) {
 					memcpy(ret, recvBuf + 4, dataLength);
 					return 1;
 				}
+				fprintf(stderr, "receive_handle error: wrong crc\n");
 				return -1;
 			}
 		}
 	}
+	fprintf(stderr, "receive_handle error: data not available\n");
+	return -1;
 }
 
 

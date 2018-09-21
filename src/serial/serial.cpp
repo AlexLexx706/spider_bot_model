@@ -5,6 +5,7 @@
 #include <termios.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 Serial::Serial():fd(-1), read_res(-1) {
 
@@ -84,6 +85,10 @@ int Serial::available() {
 		return 1;
 	}
 	int res = ::read(fd, &read_res, 1);
+
+	if (res == -1) {
+		fprintf(stderr, "read error:%s\n", strerror(errno));
+	}
 	return res;
 }
 
