@@ -3,10 +3,8 @@
 #include "leg.h"
 #include "defines.h"
 
-#define LENGTH 16
-#define WIDTH 8.
-#define HEIGHT 3.
-
+#define LENGTH 12.2
+#define WIDTH 8.3
 
 template<class T>
 class SpiderBot:public Node<T> {
@@ -50,7 +48,6 @@ public:
 	SpiderBot(
 		T length=LENGTH,
 		T width=WIDTH,
-		T height=HEIGHT,
 		T shoulder_offset=SHOULDER_OFFSET,
 		T shoulder_lenght=SHOULDER_LENGHT,
 		T forearm_lenght=FOREARM_LENGHT):
@@ -59,10 +56,10 @@ public:
 			front_left_leg(shoulder_offset, shoulder_lenght, forearm_lenght),
 			rear_left_leg(shoulder_offset, shoulder_lenght, forearm_lenght),
 			action(NOT_MOVE),
-			HALF_STEP_LEN(3.0),
-			MOVE_TIME(1),
-			STEP_HEIGHT(4.0),
-			ROTATE_ANGLE(0.5),
+			HALF_STEP_LEN(3.5),
+			MOVE_TIME(0.6),
+			STEP_HEIGHT(3.),
+			ROTATE_ANGLE(0.3),
 			move_state(-1),
 			begin_move(true),
 			first(true),
@@ -88,16 +85,16 @@ public:
 
 		//init default leg pos
 		front_right_pos = front_right_leg.get_pos() +
-			Vector3<FLOAT>(0.0, -forearm_lenght * 2, shoulder_offset + shoulder_lenght * 0.5);
+			Vector3<FLOAT>(0.0, -forearm_lenght, shoulder_offset + shoulder_lenght);
 
 		rear_right_pos = rear_right_leg.get_pos() + 
-			Vector3<FLOAT>(0.0, -forearm_lenght * 2, shoulder_offset + shoulder_lenght * 0.5);
+			Vector3<FLOAT>(0.0, -forearm_lenght, shoulder_offset + shoulder_lenght);
 
 		front_left_pos = front_left_leg.get_pos() + 
-			Vector3<FLOAT>(0.0, -forearm_lenght * 2, -(shoulder_offset + shoulder_lenght * 0.5));
+			Vector3<FLOAT>(0.0, -forearm_lenght, -(shoulder_offset + shoulder_lenght));
 
 		rear_left_pos = rear_left_leg.get_pos() + 
-			Vector3<FLOAT>(0.0, -forearm_lenght * 2, -(shoulder_offset + shoulder_lenght * 0.7));
+			Vector3<FLOAT>(0.0, -forearm_lenght, -(shoulder_offset + shoulder_lenght));
   		reset();
 	}
 
@@ -254,7 +251,8 @@ public:
 			if (first) {
 				first = false;
 				start_rear_right = rear_right_leg.end.get_g_pos();
-				cur_half_step_len = trunc((start_rear_right - front_right_leg.end.get_g_pos()).length() / fabs(half_step_len)) * half_step_len;
+				//cur_half_step_len = trunc((start_rear_right - front_right_leg.end.get_g_pos()).length() / fabs(half_step_len)) * half_step_len;
+				cur_half_step_len = half_step_len * 2.0;
 			} else if (dt >= 1.0) {
 				begin_move = true;
 				move_state = 3;
