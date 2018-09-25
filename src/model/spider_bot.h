@@ -57,7 +57,7 @@ public:
 			rear_left_leg(shoulder_offset, shoulder_lenght, forearm_lenght),
 			action(NOT_MOVE),
 			HALF_STEP_LEN(3.5),
-			MOVE_TIME(0.4),
+			MOVE_TIME(0.2),
 			STEP_HEIGHT(3.),
 			ROTATE_ANGLE(0.3),
 			move_state(-1),
@@ -85,16 +85,16 @@ public:
 
 		//init default leg pos
 		front_right_pos = front_right_leg.get_pos() +
-			Vector3<FLOAT>(0.0, -forearm_lenght, shoulder_offset + shoulder_lenght);
+			Vector3<FLOAT>(0.0, -forearm_lenght * 0.4, shoulder_offset + shoulder_lenght);
 
 		rear_right_pos = rear_right_leg.get_pos() + 
-			Vector3<FLOAT>(0.0, -forearm_lenght, shoulder_offset + shoulder_lenght);
+			Vector3<FLOAT>(0.0, -forearm_lenght * 0.4, shoulder_offset + shoulder_lenght);
 
 		front_left_pos = front_left_leg.get_pos() + 
-			Vector3<FLOAT>(0.0, -forearm_lenght, -(shoulder_offset + shoulder_lenght));
+			Vector3<FLOAT>(0.0, -forearm_lenght * 0.4, -(shoulder_offset + shoulder_lenght));
 
 		rear_left_pos = rear_left_leg.get_pos() + 
-			Vector3<FLOAT>(0.0, -forearm_lenght, -(shoulder_offset + shoulder_lenght));
+			Vector3<FLOAT>(0.0, -forearm_lenght * 0.4, -(shoulder_offset + shoulder_lenght));
   		reset();
 	}
 

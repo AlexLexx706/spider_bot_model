@@ -391,6 +391,7 @@ void ManagaServoTask::proc() {
 	} else if (managa_servo_task_store.output.state == ManagaServoTaskNS::ReadAnglesState) {
 		for (int address = 0; address < SERVOS_COUNT; address++) {
 			//check servo calibrated and
+			// fprintf(stderr, "addr:%d active:%d\n", address, servo_links[address].active);
 			if (servo_links[address].active &&
 					(address == read_angle_addres || read_angle_addres == BROADCAST_ADDR)) {
 				servo_links[address].servo_angle = Servo::read_position(serial, address);
@@ -401,13 +402,13 @@ void ManagaServoTask::proc() {
 						FLOAT(servo_links[address].max.servo_value - servo_links[address].min.servo_value)) * (
 							servo_links[address].max.model_value - servo_links[address].min.model_value) + servo_links[address].min.model_value;
 				}
-				fprintf(
-					stderr,
-					"servo_%d calibrated:%d row_angle:%d model_angle:%f\n",
-					address,
-					servo_links[address].calibrated,
-					servo_links[address].servo_angle,
-					servo_links[address].model_angle); 
+				// fprintf(
+				// 	stderr,
+				// 	"servo_%d calibrated:%d row_angle:%d model_angle:%f\n",
+				// 	address,
+				// 	servo_links[address].calibrated,
+				// 	servo_links[address].servo_angle,
+				// 	servo_links[address].model_angle); 
 			}
 		}
 	}
