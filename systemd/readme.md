@@ -1,4 +1,4 @@
-Make serive
+Make service:
 ------------
 
 0. build and copy ./test to /home/pi/test
