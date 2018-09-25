@@ -1,5 +1,5 @@
-Make serive
-------------
+Make service:
+-------------
 0. create file spider_bot.service in /home/pi/test
 1. copy calibration file links.bin to /home/pi/test
 2. copy file spider_bot.service to /etc/systemd/system/: `sudo cp ./spider_bot.service /etc/systemd/system/` 
