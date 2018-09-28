@@ -122,32 +122,33 @@ bool Server::post_process() {
 	//send result after manage servos 
 	if (post_processing_cmd != NULL) {
 		const Header * header(reinterpret_cast<const Header *>(post_processing_cmd));
+		if (header->resp_flag) {
+			// 1. process servo manage command result
+			if (header->cmd == CMD_MANAGE_SERVO) {
+				ManageServoRes * res(reinterpret_cast<ManageServoRes *>(out_buffer));
 
-		// 1. process servo manage command result
-		if (header->cmd == CMD_MANAGE_SERVO) {
-			ManageServoRes * res(reinterpret_cast<ManageServoRes *>(out_buffer));
+				//create reply 
+				res->header.cmd = header->cmd;
+				res->header.size = sizeof(ManageServoRes) - sizeof(Header);
+				res->error = (
+					(managa_servo_task_store.output.state > ManagaServoTaskNS::NoneState) &&
+					(managa_servo_task_store.output.state < ManagaServoTaskNS::ErrorState)) ? NO_ERROR  : UNKNOWN_ERROR;
+				res->state = managa_servo_task_store.output.state;
 
-			//create reply 
-			res->header.cmd = header->cmd;
-			res->header.size = sizeof(ManageServoRes) - sizeof(Header);
-			res->error = (
-				(managa_servo_task_store.output.state > ManagaServoTaskNS::NoneState) &&
-				(managa_servo_task_store.output.state < ManagaServoTaskNS::ErrorState)) ? NO_ERROR  : UNKNOWN_ERROR;
-			res->state = managa_servo_task_store.output.state;
-
-			//send reply
-			if (sendto(sock, out_buffer, sizeof(ManageServoRes), 0, (struct sockaddr*) &si_other, slen) == -1) {
-				perror("sendto");
-			}
-		// 2 other commands
-		} else {
-			int reply_len = reply(
-				static_cast<Cmd>(header->cmd),
-				UNKNOWN_ERROR,
-				out_buffer,
-				sizeof(out_buffer));
-			if (sendto(sock, out_buffer, reply_len, 0, (struct sockaddr*) &si_other, slen) == -1) {
-				perror("sendto");
+				//send reply
+				if (sendto(sock, out_buffer, sizeof(ManageServoRes), 0, (struct sockaddr*) &si_other, slen) == -1) {
+					perror("sendto");
+				}
+			// 2 other commands
+			} else {
+				int reply_len = reply(
+					static_cast<Cmd>(header->cmd),
+					UNKNOWN_ERROR,
+					out_buffer,
+					sizeof(out_buffer));
+				if (sendto(sock, out_buffer, reply_len, 0, (struct sockaddr*) &si_other, slen) == -1) {
+					perror("sendto");
+				}
 			}
 		}
 		post_processing_cmd = NULL;
@@ -220,6 +221,8 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 	if (in_size < sizeof(Header)) {
 		return reply(UNKNOWN_CMD, WRONG_DATA, out_data, max_out_size);
 	}
+	fprintf(stderr, "cmd_handler cmd:%d resp_flag:%d\n", header->cmd, header->resp_flag);
+
 	//2. process commands
 	switch (header->cmd) {
 		case CMD_GET_STATE: {
@@ -228,15 +231,16 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 		}
 		case CMD_SET_ACTION: {
 			if (in_size < sizeof(SetActionCmd)) {
-				return reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size);
+				return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size) : 0;
 			}
 
 			bot.set_action(static_cast<Action>(static_cast<const SetActionCmd *>(in_data)->action));
-			break;
+			return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size) : 0;
+			
 		}
 		case CMD_MANAGE_SERVO: {
 			if (in_size < sizeof(ManageServoCmd)) {
-				return reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size);
+				return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size) : 0;
 			}
 
 			//set data for cds
@@ -249,7 +253,7 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 		}
 		case CMD_ADD_NOTIFY: {
 			if (in_size < sizeof(AddNotifyCmd)) {
-				return reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size);
+				return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size) : 0;
 			}
 			const AddNotifyCmd * notify(static_cast<const AddNotifyCmd *>(in_data));
 			//add new notify
@@ -266,15 +270,15 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 			//1. new notifier
 			if (iter == notify_list.end()) {
 				notify_list.push_back(new_addr);
-				return reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size);
+				return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size) : 0;
 			}
 
 			//2. notify exist
-			return reply(static_cast<Cmd>(header->cmd), WRONG_PARAMS, out_data, max_out_size);
+			return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), WRONG_PARAMS, out_data, max_out_size) : 0;
 		}
 		case CMD_RM_NOTIFY: {
 			if (in_size < sizeof(RmNotifyCmd)) {
-				return reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size);
+				return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size) : 0;
 			}
 
 			const RmNotifyCmd * notify(static_cast<const RmNotifyCmd *>(in_data));
@@ -292,26 +296,26 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 
 			//1. notifier not exist
 			if (iter == notify_list.end()) {
-				return reply(static_cast<Cmd>(header->cmd), WRONG_PARAMS, out_data, max_out_size);
+				return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), WRONG_PARAMS, out_data, max_out_size) : 0;
 			}
 
 			notify_list.erase(iter);
-			return reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size);
+			return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size) : 0;
 		}
 		case CMD_SET_LEG_GEOMETRY: {
 			if (in_size < sizeof(SetLegGeometry)) {
-				return reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size);
+				return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size) : 0;
 			}
 
 			const SetLegGeometry * leg_geometry(static_cast<const SetLegGeometry *>(in_data));
 			if (!set_leg_geometry(static_cast<LegNum>(leg_geometry->leg_num), leg_geometry->geometry)) {
 				return reply(static_cast<Cmd>(header->cmd), WRONG_PARAMS, out_data, max_out_size);
 			}
-			return reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size);
+			return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size) : 0;
 		}
 
 	}
 
 	// 3. wrong command repry
-	return reply(static_cast<Cmd>(header->cmd), WRONG_COMMAND, out_data, max_out_size);
+	return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), WRONG_COMMAND, out_data, max_out_size) : 0;
 }

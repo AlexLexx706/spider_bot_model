@@ -42,6 +42,7 @@ enum Error {
 
 struct __attribute__((__packed__)) Header {
 	int32_t cmd;
+    int8_t resp_flag;
 	uint32_t size; 
 };
 
