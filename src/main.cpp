@@ -36,7 +36,9 @@ void sig_handler(int signo) {
 }
 
 
+#include "defines.h"
 int main() {
+	fprintf(stderr, "sizeof(GetStateRes):%d\n", sizeof(GetStateRes<FLOAT>));
 	//save_legs_geometry();
 	load_legs_geometry();
 

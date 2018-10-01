@@ -14,6 +14,15 @@ namespace Servo {
 	uint16_t read_vin(Serial &serial_x, uint8_t id);
 	bool limit_write(Serial &serial_x, uint8_t id, uint16_t min_angle, uint16_t max_angle);
 	int limit_read(Serial &serial_x, uint8_t id, uint16_t & min_angle, uint16_t & max_angle);
+
+	/**
+	 * @brief read led error code
+	 * @param serial_x com port 
+	 * @param id servo id
+	 * 
+	 * @return -1 read error, else error codes
+	 */
+	int led_error_read(Serial &serial_x, uint8_t id);
 }
 
 #endif //_SERIAL_SERVO_RP_H_

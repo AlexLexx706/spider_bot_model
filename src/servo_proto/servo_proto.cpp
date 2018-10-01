@@ -268,4 +268,22 @@ namespace Servo {
 		}
 		return 1;
 	}
+
+	int led_error_read(Serial &serial_x, uint8_t id) {
+		int count = 10000;
+		int16_t ret;
+		uint8_t buf[6];
+
+		buf[0] = buf[1] = LOBOT_SERVO_FRAME_HEADER;
+		buf[2] = id;
+		buf[3] = 3;
+		buf[4] = LOBOT_SERVO_ANGLE_LIMIT_READ;
+		buf[5] = LobotCheckSum(buf);
+		serial_x.write(buf, 6);
+
+		if (receive_handle(serial_x, buf) > 0) {
+			return buf[1];
+		}
+		return -1;
+	}
 }

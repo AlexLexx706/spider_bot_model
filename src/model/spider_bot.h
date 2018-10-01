@@ -85,16 +85,16 @@ public:
 
 		//init default leg pos
 		front_right_pos = front_right_leg.get_pos() +
-			Vector3<FLOAT>(0.0, -forearm_lenght * 0.4, shoulder_offset + shoulder_lenght);
+			Vector3<FLOAT>(0.0, -forearm_lenght * 0.5, shoulder_offset + shoulder_lenght);
 
 		rear_right_pos = rear_right_leg.get_pos() + 
-			Vector3<FLOAT>(0.0, -forearm_lenght * 0.4, shoulder_offset + shoulder_lenght);
+			Vector3<FLOAT>(0.0, -forearm_lenght * 0.5, shoulder_offset + shoulder_lenght);
 
 		front_left_pos = front_left_leg.get_pos() + 
-			Vector3<FLOAT>(0.0, -forearm_lenght * 0.4, -(shoulder_offset + shoulder_lenght));
+			Vector3<FLOAT>(0.0, -forearm_lenght * 0.5, -(shoulder_offset + shoulder_lenght));
 
 		rear_left_pos = rear_left_leg.get_pos() + 
-			Vector3<FLOAT>(0.0, -forearm_lenght * 0.4, -(shoulder_offset + shoulder_lenght));
+			Vector3<FLOAT>(0.0, -forearm_lenght * 0.5, -(shoulder_offset + shoulder_lenght));
   		reset();
 	}
 
