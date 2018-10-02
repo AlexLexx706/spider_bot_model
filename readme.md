@@ -1,3 +1,4 @@
 Spider-bot project firmware:
 ----------------------------
-[![First steps video](https://www.youtube.com/watch?v=2HXWlfvWsjc)
+
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/2HXWlfvWsjc/0.jpg)](http://www.youtube.com/watch?v=2HXWlfvWsjc)
