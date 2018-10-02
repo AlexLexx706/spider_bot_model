@@ -19,7 +19,6 @@ static bool exit_flag = false;
 static Server server;
 static SaveModelAnglesTask save_model_angles_task;
 
-
 const char * links_data_file_path = "links.bin";
 const char * LEGS_GEOMETRY_PATH = "legs_geometry.bin";
 
@@ -38,7 +37,7 @@ void sig_handler(int signo) {
 
 #include "defines.h"
 int main() {
-	fprintf(stderr, "sizeof(GetStateRes):%d\n", sizeof(GetStateRes<FLOAT>));
+	fprintf(stderr, "sizeof(GetStateRes):%lu\n", sizeof(GetStateRes<FLOAT>));
 	//save_legs_geometry();
 	load_legs_geometry();
 
@@ -81,7 +80,7 @@ int main() {
 
 		// 3. process_tasks
 		manage_servo_task.proc();
-		
+
 		// 4. send task results and notifys
 		server.post_process();
 

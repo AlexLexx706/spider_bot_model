@@ -23,6 +23,7 @@ namespace Servo {
 	 * @return -1 read error, else error codes
 	 */
 	int led_error_read(Serial &serial_x, uint8_t id);
+	int led_error_write(Serial &serial_x, uint8_t id, int error_type);
 }
 
 #endif //_SERIAL_SERVO_RP_H_

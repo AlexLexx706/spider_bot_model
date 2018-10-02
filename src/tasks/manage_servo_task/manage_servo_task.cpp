@@ -363,6 +363,18 @@ void ManagaServoTask::proc() {
 			managa_servo_task_store.output.state = ManagaServoTaskNS::SterringsProgress;
 			return;
 		}
+		case ManagaServoTaskNS::SetLedErrorCmd: {
+			int value = (int)managa_servo_task_store.input.value;
+			fprintf(stderr, "SetLedErrorCmd 1. value:%d\n", value);
+
+			//1. set servo led error
+			Servo::led_error_write(
+				serial,
+				BROADCAST_ADDR,
+				value);
+			managa_servo_task_store.output.state = ManagaServoTaskNS::CompleteState;
+			return;
+		}
 	}
 
 	//1. sterrings in progress

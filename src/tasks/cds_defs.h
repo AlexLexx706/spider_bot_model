@@ -20,6 +20,7 @@ namespace ManagaServoTaskNS {
 		DisableReadAngles,
 		MoveServo,
 		MoveServoSin,
+		SetLedErrorCmd,	//use for detect servo problems via led flesh
 	};
 
 	enum State {
