@@ -314,7 +314,25 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 			return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size) : 0;
 		}
 		case CMD_GET_SERVO_STATE: {
+			if (in_size < sizeof(GetServoStateCmd)) {
+				return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), WRONG_DATA, out_data, max_out_size) : 0;
+			}
 
+			const GetServoStateCmd * leg_geometry(static_cast<const GetServoStateCmd *>(in_data));
+
+			//check servo id
+			if (leg_geometry->servo_id > SERVOS_COUNT) {
+				return reply(static_cast<Cmd>(header->cmd), WRONG_SERVO_ID, out_data, max_out_size);
+			}
+
+			//return servo state
+			GetServoStateRes * res = static_cast<GetServoStateRes *>(out_data);
+			res->header.header.cmd = CMD_GET_STATE;
+			res->header.error = NO_ERROR;
+			res->header.header.size = sizeof(GetServoStateRes) - sizeof(Header);
+			res->servo_id = leg_geometry->servo_id;
+			memcpy(&res->desc, &servo_links[res->servo_id], sizeof(ServoLinkDesc));
+			return sizeof(GetServoStateRes);
 		}
 	}
 

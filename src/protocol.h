@@ -5,7 +5,7 @@
 #include "vmath.h"
 #include "common_defs.h"
 #include "geometry_desc.h"
-
+#include "servo_desc.h"
 
 enum LegNum {
 	FRONT_RIGHT_LEG_NUM = 0,
@@ -40,6 +40,7 @@ enum Error {
 	UNKNOWN_ERROR = 2,
 	WRONG_DATA = 3,
 	WRONG_PARAMS = 4,
+	WRONG_SERVO_ID = 5,
 };
 
 
@@ -98,9 +99,17 @@ struct SetLegGeometry {
 	LegGeometry<FLOAT> geometry;
 };
 
+//used for request servo state
 struct __attribute__((__packed__)) GetServoStateCmd {
 	Header header;
 	uint8_t servo_id;
+};
+
+//return servo state result
+struct __attribute__((__packed__)) GetServoStateRes {
+	ResHeader header;
+	uint8_t servo_id;
+	ServoLinkDesc desc;
 };
 
 
