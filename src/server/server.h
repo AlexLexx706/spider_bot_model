@@ -2,7 +2,7 @@
 #define _SERVER_H_
 
 #include "common_defs.h"
-#include "defines.h"
+#include "protocol.h"
 #include <netinet/in.h>
 #include <list>
 #include <stdint.h>

@@ -1,7 +1,7 @@
 #ifndef SPIDER_BOT_H
 #define SPIDER_BOT_H
 #include "leg.h"
-#include "defines.h"
+#include "protocol.h"
 
 #define LENGTH 12.2
 #define WIDTH 8.3

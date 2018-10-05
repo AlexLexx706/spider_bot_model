@@ -1,6 +1,6 @@
 #ifndef tasks_utils_h_
 #define tasks_utils_h_
-#include "defines.h"
+#include "protocol.h"
 #include "leg.h"
 
 FLOAT get_model_angle(uint8_t address);
