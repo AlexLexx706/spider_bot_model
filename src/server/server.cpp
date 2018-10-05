@@ -313,7 +313,9 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 			}
 			return header->resp_flag ? reply(static_cast<Cmd>(header->cmd), NO_ERROR, out_data, max_out_size) : 0;
 		}
+		case CMD_GET_SERVO_STATE: {
 
+		}
 	}
 
 	// 3. wrong command repry

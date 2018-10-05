@@ -3,6 +3,9 @@
 #include "protocol.h"
 #include "leg.h"
 
+//used for save/restore leg geometry from file
+typedef LegGeometry<FLOAT> LegsGeometryStore[LEGS_COUNT]; 
+
 FLOAT get_model_angle(uint8_t address);
 Leg<FLOAT> * get_len_by_num(LegNum num);
 bool set_leg_geometry(LegNum num, const LegGeometry<FLOAT> & geometry);
