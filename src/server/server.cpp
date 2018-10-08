@@ -101,7 +101,7 @@ bool Server::process() {
 	} else {
 		//rend responce
 		recv_len = cmd_handler(in_buffer, recv_len, out_buffer, sizeof(out_buffer), si_other);
-		
+		fprintf(stderr, "cmd_handler recv_len:%d port:%d\n", recv_len, ntohs(si_other.sin_port));
 		//not send empty result
 		if (recv_len != 0) {
 			if (sendto(sock, out_buffer, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1) {
@@ -211,6 +211,37 @@ size_t Server::get_geometry_state(GetStateRes<FLOAT> & res) {
 	return sizeof(res); 
 }
 
+const char * get_cmd_name(int id) {
+	switch (id) {
+		case UNKNOWN_CMD: {
+			return "UNKNOWN_CMD";
+		}
+		case CMD_GET_STATE: {
+			return "CMD_GET_STATE";
+		}
+		case CMD_SET_ACTION: {
+			return "CMD_SET_ACTION";
+		}
+		case CMD_ADD_NOTIFY: {
+			return "CMD_ADD_NOTIFY";
+		}
+		case CMD_RM_NOTIFY: {
+			return "CMD_RM_NOTIFY";
+		}
+		case CMD_MANAGE_SERVO: {
+			return "CMD_MANAGE_SERVO";
+		}
+		case CMD_SET_LEG_GEOMETRY: {
+			return "CMD_SET_LEG_GEOMETRY";
+		}
+		case CMD_GET_SERVO_STATE: {
+			return "CMD_GET_SERVO_STATE";
+		}
+		default:
+			return "unknown cmd";
+	}
+}
+
 //handle command and return result
 int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data, uint32_t max_out_size, const sockaddr_in & addr) {
 	assert(in_data && in_size && max_out_size);
@@ -221,7 +252,7 @@ int Server::cmd_handler(const void * in_data, uint32_t in_size, void * out_data,
 	if (in_size < sizeof(Header)) {
 		return reply(UNKNOWN_CMD, WRONG_DATA, out_data, max_out_size);
 	}
-	fprintf(stderr, "cmd_handler cmd:%d resp_flag:%d\n", header->cmd, header->resp_flag);
+	fprintf(stderr, "cmd_handler cmd:%d desc:%s resp_flag:%d\n", header->cmd, get_cmd_name(header->cmd), header->resp_flag);
 
 	//2. process commands
 	switch (header->cmd) {

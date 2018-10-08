@@ -37,7 +37,11 @@ void sig_handler(int signo) {
 
 #include "protocol.h"
 int main() {
-	fprintf(stderr, "sizeof(GetStateRes):%lu\n", sizeof(GetStateRes<FLOAT>));
+	fprintf(stderr, "sizeof(GetServoStateCmd):%lu\n", sizeof(GetServoStateCmd));
+	fprintf(stderr, "sizeof(GetServoStateRes):%lu\n", sizeof(GetServoStateRes));
+	fprintf(stderr, "sizeof(LimmitDesc):%lu\n", sizeof(LimmitDesc));
+	fprintf(stderr, "sizeof(ServoLinkDesc):%lu\n", sizeof(ServoLinkDesc));
+
 	//save_legs_geometry();
 	load_legs_geometry();
 

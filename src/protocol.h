@@ -93,7 +93,7 @@ struct __attribute__((__packed__)) ManageServoRes: public ResHeader {
 	int32_t state;
 };
 
-struct SetLegGeometry {
+struct  SetLegGeometry {
 	Header header;
 	uint32_t leg_num;
 	LegGeometry<FLOAT> geometry;
