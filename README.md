@@ -8,3 +8,8 @@
 
 
 
+## Текущее состояние проекта:
+
+* [линейное движение вперёд/назад](https://www.youtube.com/watch?v=2HXWlfvWsjc)
+* [повороты](https://www.youtube.com/watch?v=gQzExbzu-hw)
+
